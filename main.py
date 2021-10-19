@@ -1,12 +1,7 @@
-
-# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
-# SPDX-License-Identifier: MIT
-
-"""Example that iterates through a servo on every channel, sets each to 180 and then back to 0."""
 import time
-import subprocess
+import subprocess                  #not required
 import board
-import busio
+import busio                       #not required
 i2c = busio.I2C(board.SCL, board.SDA)
 from adafruit_servokit import ServoKit
 from multiprocessing import Pool
@@ -18,19 +13,21 @@ import adafruit_motor.servo
 # 8 for FeatherWing, 16 for Shield/HAT/Bonnet.
 kit = ServoKit(channels=16)
 kit.servo.frequency = 50
-kit.servo[0].actuation_range = 180
+kit.servo[0].actuation_range = 180  #sets the max angle on pin 0 to 180°
 kit.servo[1].actuation_range = 120
 kit.servo[2].actuation_range = 130
 kit.servo[3].actuation_range = 180  #still needs adjustment
 kit.servo[4].actuation_range = 180  #still needs adjustment
 kit.servo[5].actuation_range = 25   #range 25 = closed 15 = open
 run = 0
+print("select a pin")
 while run <= 100:
     key = input()
     if key == "0":
         print("choose angle")
-        angle = int(input())
-        kit.servo[0].angle = angle
+        angle = int(input())        #sets var angle to the int of the input
+        kit.servo[0].angle = angle  #moves servo 0 to the value of variable angle°
+        print("select a pin")
         
 
     else:
@@ -38,6 +35,7 @@ while run <= 100:
             print("choose angle")
             angle = int(input())
             kit.servo[1].angle = angle
+            print("select a pin")
 
         else:
             if key == "exit":
@@ -60,29 +58,33 @@ while run <= 100:
                         print("choose angle")
                         angle = int(input())
                         kit.servo[2].angle = angle
+                        print("select a pin")
 
                     else:
                         if key == "3":
                             print("choose angle")
                             angle = int(input())
                             kit.servo[3].angle = angle
+                            print("select a pin")
 
                         else:
                             if key == "4":
                                 print("choose angle")
                                 angle = int(input())
                                 kit.servo[4].angle = angle
+                                print("select a pin")
 
                             else:
                                 if key == "5":
                                     print("choose angle")
                                     angle = int(input())
                                     kit.servo[5].angle = angle
+                                    print("select a pin")
 
                                 else:
-                                    if key == "test":
-                                        import testsubprocess
-                                        import testsub2
+                                    if key == "test":         #This part is just experimentation
+                                        import testsubprocess #runs file testsubprocess
+                                        import testsub2       #runs fie testsub2
                                         
 
 time.sleep(1)
