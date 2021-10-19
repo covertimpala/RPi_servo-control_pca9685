@@ -7,5 +7,5 @@ Requires you to have the [adafruit servokit library](https://circuitpython.readt
 You also need to [configure i2c on your raspberry pi](https://learn.adafruit.com/adafruits-raspberry-pi-lesson-4-gpio-setup/configuring-i2c)
 
 ### Usage
-Run the program and type the pin number that the servo you wish to control is connected to
+Run `main.py` and type the pin number that the servo you wish to control is connected to eg. 0
 Once you have done that it will reply with `choose angle`. Type the appropriate angle and hit enter, the selected servo should move to the specified angle.
