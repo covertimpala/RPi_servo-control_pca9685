@@ -16,9 +16,9 @@ kit.servo.frequency = 50
 kit.servo[0].actuation_range = 180
 kit.servo[1].actuation_range = 120
 kit.servo[2].actuation_range = 130
-kit.servo[3].actuation_range = 180  #still needs adjustment
+kit.servo[3].actuation_range = 65  #still needs adjustment
 kit.servo[4].actuation_range = 180  #still needs adjustment
-kit.servo[5].actuation_range = 30   #range 30 = closed 10 = open
+kit.servo[5].actuation_range = 180   #range 90 = open 132 = closed
 run = 0
 while run <= 100:
     key = input()
@@ -46,13 +46,13 @@ while run <= 100:
                     time.sleep(2)
                     kit.servo[1].angle = 20
                     time.sleep(2)
-                    kit.servo[2].angle = 15
+                    kit.servo[2].angle = 10
                     time.sleep(2)
-                    kit.servo[3].angle = 70
+                    kit.servo[3].angle = 25
                     time.sleep(2)
                     kit.servo[4].angle = 140
                     time.sleep(2)
-                    kit.servo[5].angle = 30
+                    kit.servo[5].angle = 130
                     print("arm has been returned to idle pos")
 
                 else:
