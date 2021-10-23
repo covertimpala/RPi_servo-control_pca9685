@@ -129,19 +129,28 @@ while run <= 100:
                                                     if key == "speed":
                                                         print("servo:")
                                                         servo = int(input())
+                                                        current_angle = round(int(kit.servo[servo].angle))
                                                         print("angle:")
                                                         angle = int(input())
                                                         print("speed:")
                                                         speed = int(input())
                                                         speed_percent = round(speed / angle * 100)
-                                                        print(speed_percent)
-                                                        min_angle = angle / speed_percent
-                                                        f = 1
-                                                        while f in range(0, int(angle)):
-                                                            print(f)
-                                                            kit.servo[servo].angle = f
-                                                            f = int(f + int(speed_percent))
-                                                        kit.servo[servo].angle = angle
+                                                        print(f"speed set to {speed_percent}")
+                                                        f = current_angle
+                                                        if current_angle < angle:
+                                                            while f in range(0, int(angle)):
+                                                                print(f)
+                                                                kit.servo[servo].angle = f
+                                                                f = int(f + int(speed_percent))
+
+                                                        else:
+                                                            print("e")
+                                                            while f in range(int(angle), 180):
+                                                                print(f)
+                                                                kit.servo[servo].angle = f
+                                                                f = int(f - int(speed_percent))
+                                                            
+                                                        
                                                             
                                             
                                         
