@@ -5,10 +5,13 @@ import busio
 i2c = busio.I2C(board.SCL, board.SDA)
 from adafruit_servokit import ServoKit
 from multiprocessing import Pool
+import RPi.GPIO as GPIO
 
 import adafruit_motor.servo
 
 
+GPIO . setmode ( GPIO . BCM )
+GPIO . setup ( 18 , GPIO . OUT )
 # Set channels to the number of servo channels on your kit.
 # 8 for FeatherWing, 16 for Shield/HAT/Bonnet.
 kit = ServoKit(channels=16)
@@ -42,13 +45,13 @@ while run <= 100:
             else:
                 if key == "idle":
                     print("going to idle pos")
-                    kit.servo[0].angle = 180
-                    time.sleep(2)
                     kit.servo[1].angle = 20
                     time.sleep(2)
                     kit.servo[2].angle = 10
                     time.sleep(2)
                     kit.servo[3].angle = 25
+                    time.sleep(2)
+                    kit.servo[0].angle = 180
                     time.sleep(2)
                     kit.servo[4].angle = 140
                     time.sleep(2)
@@ -149,6 +152,16 @@ while run <= 100:
                                                                 print(f)
                                                                 kit.servo[servo].angle = f
                                                                 f = int(f - int(speed_percent))
+
+                                                    else:
+                                                        if key == "led on":
+                                                            GPIO.output(18, True)
+                                                            print("led is on")
+
+                                                        else:
+                                                            if key == "led off":
+                                                                GPIO.output(18, False)
+                                                                print("led is off")
                                                             
                                                         
                                                             
