@@ -19,10 +19,12 @@ kit.servo.frequency = 50
 kit.servo[0].actuation_range = 180
 kit.servo[1].actuation_range = 120
 kit.servo[2].actuation_range = 130
-kit.servo[3].actuation_range = 65  #still needs adjustment
+kit.servo[3].actuation_range = 90  #still needs adjustment
 kit.servo[4].actuation_range = 180  #still needs adjustment
 kit.servo[5].actuation_range = 180   #range 90 = open 132 = closed
 run = 0
+lock = 0
+speed = 0
 while run <= 100:
     key = input()
     if key == "0":
@@ -35,7 +37,29 @@ while run <= 100:
         if key == "1":
             print("choose angle")
             angle = int(input())
-            kit.servo[1].angle = angle
+            
+            if lock == 1:
+                change_angle = int(angle) - int(round(int(kit.servo[1].angle)))
+                kit.servo[1].angle = angle
+                if int(round(int(kit.servo[2].angle) + int(change_angle))) >= 0:
+                    kit.servo[2].angle = int(round(int(kit.servo[2].angle) + int(change_angle)))
+                    print(int(change_angle))
+                    print(round(kit.servo[2].angle + change_angle))
+                else:
+                    kit.servo[2].angle = 0
+                    print("cant engage lock")
+            else:
+                if lock == 2:
+                    change_angle = int(angle) - int(round(int(kit.servo[1].angle)))
+                    kit.servo[1].angle = angle
+                    if int(round(int(kit.servo[3].angle) + int(change_angle))) >= 30:
+                        kit.servo[3].angle = int(round(int(kit.servo[3].angle) + int(change_angle)))
+                    else:
+                        kit.servo[3].angle = 30
+                        print("cant engage lock")
+
+                else:
+                    kit.servo[1].angle = angle
 
         else:
             if key == "exit":
@@ -47,7 +71,7 @@ while run <= 100:
                     print("going to idle pos")
                     kit.servo[1].angle = 20
                     time.sleep(2)
-                    kit.servo[2].angle = 10
+                    kit.servo[2].angle = 7
                     time.sleep(2)
                     kit.servo[3].angle = 25
                     time.sleep(2)
@@ -62,7 +86,19 @@ while run <= 100:
                     if key == "2":
                         print("choose angle")
                         angle = int(input())
-                        kit.servo[2].angle = angle
+                        
+                        if lock == 2:
+                            change_angle = int(angle) - int(round(int(kit.servo[2].angle))) * -1
+                            kit.servo[2].angle = angle
+                            if int(round(int(kit.servo[3].angle) + int(change_angle))) >= 30:
+                                kit.servo[3].angle = int(round(int(kit.servo[3].angle) + int(change_angle)))
+                            else:
+                                kit.servo[3].angle = 30
+                                print("cant engage lock")
+                        else:
+                            kit.servo[2].angle = angle
+                                
+                            
 
                     else:
                         if key == "3":
@@ -162,6 +198,30 @@ while run <= 100:
                                                             if key == "led off":
                                                                 GPIO.output(18, False)
                                                                 print("led is off")
+
+                                                            else:
+                                                                if key == "lock":
+                                                                    print("servo to lock (2 or 3)")
+                                                                    servo_lock = int(input())
+                                                                    if servo_lock == 2:
+                                                                        lock = 1
+
+                                                                    else:
+                                                                        if servo_lock == 3:
+                                                                            lock = 2
+
+                                                                    print("sucess!!")
+                                                                    
+
+                                                                else:
+                                                                    if key == "unlock":
+                                                                        print("unlocking servos")
+                                                                        lock = 0
+                                                                        print("servo(s) unlocked")
+
+
+                                                                    
+
                                                             
                                                         
                                                             
