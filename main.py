@@ -220,6 +220,20 @@ while run <= 100:
                                                                         print("servo(s) unlocked")
 
 
+                                                                    else:
+                                                                        if key == "muscsense":
+                                                                            EMG = 1
+                                                                            print("activating code")
+                                                                            import serial_comm
+                                                                            while EMG == 1:
+                                                                                from serial_comm import sens0
+                                                                                from serial_comm import sens1
+                                                                            
+                                                                                    
+                                                                                
+                                                                            
+
+
                                                                     
 
                                                             
