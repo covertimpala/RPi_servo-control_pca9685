@@ -8,6 +8,7 @@ from multiprocessing import Pool
 import RPi.GPIO as GPIO
 
 import adafruit_motor.servo
+import serial
 
 
 GPIO . setmode ( GPIO . BCM )
@@ -25,6 +26,7 @@ kit.servo[5].actuation_range = 180   #range 90 = open 132 = closed
 run = 0
 lock = 0
 speed = 0
+EMG = 0
 while run <= 100:
     key = input()
     if key == "0":
@@ -163,6 +165,15 @@ while run <= 100:
                                                     print("")
                                                     print("leave the program:")
                                                     print("exit")
+                                                    print("")
+                                                    print("lock servo angle:")
+                                                    print("lock")
+                                                    print("to unlock:")
+                                                    print("unlock")
+                                                    print("")
+                                                    print("activate/deactivate EMG sensors:")
+                                                    print("emg <on/off>")
+                                                    
 
                                                 else:
                                                     if key == "speed":
@@ -221,13 +232,25 @@ while run <= 100:
 
 
                                                                     else:
-                                                                        if key == "muscsense":
+                                                                        if key == "emg on":
                                                                             EMG = 1
                                                                             print("activating code")
-                                                                            import serial_comm
+                                                                            
+                                                                            time.sleep(2)
                                                                             while EMG == 1:
-                                                                                from serial_comm import sens0
-                                                                                from serial_comm import sens1
+                                                                                import serial_comm
+                                                                                if __name__ == "__main__":
+                                                                                    serial_comm.sensors()
+                                                                                    print(serial_comm.sens0)
+                                                                                    print(serial_comm.sens1)
+                                                                                
+                                                                                
+
+
+                                                                        else:
+                                                                            if key == "emg off":
+                                                                                EMG = 0
+                                                                                print("sensors deactivated")
                                                                             
                                                                                     
                                                                                 
