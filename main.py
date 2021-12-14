@@ -246,7 +246,7 @@ while run <= 100:
                                                                                 
                                                                                 if __name__ == "__main__":
                                                                                     serial_comm.sensors()
-                                                                                    if int(float(serial_comm.sens0)) <= 1.3:
+                                                                                    if float(serial_comm.sens0) <= float(relav0) + float(error0):
                                                                                         status0 = "IDLE"
                                                                                         statsense = 0
                                                                                     else:
@@ -266,19 +266,19 @@ while run <= 100:
                                                                                     
                                                                                             
 
-                                                                                    if int(float(serial_comm.sens1)) <= 1.3:
+                                                                                    if float(serial_comm.sens1) <= float(relav1) + float(error1):
                                                                                         status1 = "IDLE"
                                                                                     else:
                                                                                         status1 = "ACTIVE"
                                                                                     
                                                                                     if status1 == "IDLE":
-                                                                                        if int(float(serial_comm.sens0)) >= 1.3:
+                                                                                        if int(float(serial_comm.sens0)) >= float(triggav0) + float(error0):
                                                                                             current_angle = round(int(kit.servo[emgservo].angle))
                                                                                             if kit.servo[emgservo].actuation_range >= int(current_angle + 4):
                                                                                                 kit.servo[emgservo].angle = int(current_angle + 5)
 
                                                                                     if status0 == "IDLE":
-                                                                                        if int(float(serial_comm.sens1)) >= 1.3:
+                                                                                        if int(float(serial_comm.sens1)) >= float(triggav1) + float(error1):
                                                                                             current_angle = round(int(kit.servo[emgservo].angle))
                                                                                             if current_angle >= 6:
                                                                                                 kit.servo[emgservo].angle = int(current_angle - 5)
@@ -325,7 +325,7 @@ while run <= 100:
                                                                                                     print("starting")
                                                                                                     large0 = 0
                                                                                                     large1 = 0
-                                                                                                    while i <= 10:
+                                                                                                    while i <= 10:             # idle calibration
                                                                                                         import serial_comm
                                                                                                         if __name__ == "__main__":
                                                                                                             serial_comm.sensors()
@@ -347,14 +347,14 @@ while run <= 100:
                                                                                                     print(f"relax0 = {relav0}")
                                                                                                     print(f"relax1 = {relav1}")
                                                                                                     print("error range:")
-                                                                                                    error0 = float(large0) - float(relav0)
-                                                                                                    error1 = float(large1) - float(relav1)
+                                                                                                    error0 = float(large0) - float(relav0)   # data range sensor 0
+                                                                                                    error1 = float(large1) - float(relav1)   # data range sensor 1
                                                                                                     print(f"0: {error0}")
                                                                                                     print(f"1: {error1}")
-                                                                                                    if float(error0) >= .7:
+                                                                                                    if float(error0) >= 1:
                                                                                                         print("CALIBRATION RESULT ERROR RANGE TOO LARGE")
                                                                                                     else:
-                                                                                                        if float(error1) >= .7:
+                                                                                                        if float(error1) >= 1:
                                                                                                             print("CALIBRATION RESULT ERROR RANGE TOO LARGE")
                                                                                                         else:
                                                                                                             print("RESULTS VALID")
@@ -365,25 +365,129 @@ while run <= 100:
                                                                                                                 import serial_comm
                                                                                                                 if __name__ == "__main__":
                                                                                                                     serial_comm.sensors()
-                                                                                                                if float(serial_comm.sens0) >= float(relav0) + float(error0):
-                                                                                                                    print("H")
+                                                                                                                if float(serial_comm.sens0) >= float(relav0) + float(error0) + 1:       # sensor 0
+                                                                                                                    print("sensor 0 triggered")
+                                                                                                                    print("starting in 5 sec")
+                                                                                                                    time.sleep(1)
+                                                                                                                    print("4")
+                                                                                                                    time.sleep(1)
+                                                                                                                    print("3")
+                                                                                                                    time.sleep(1)
+                                                                                                                    print("2")
+                                                                                                                    time.sleep(1)
+                                                                                                                    print("1")
+                                                                                                                    time.sleep(1)
+                                                                                                                    print("starting")
                                                                                                                     r = 2
+                                                                                                                else:
+                                                                                                                    if float(serial_comm.sens1) >= float(relav0) + float(error0) + 1:   # sensor 1
+                                                                                                                        print("sensor 1 triggered")
+                                                                                                                        print("starting in 5 sec")
+                                                                                                                        time.sleep(1)
+                                                                                                                        print("4")
+                                                                                                                        time.sleep(1)
+                                                                                                                        print("3")
+                                                                                                                        time.sleep(1)
+                                                                                                                        print("2")
+                                                                                                                        time.sleep(1)
+                                                                                                                        print("1")
+                                                                                                                        time.sleep(1)
+                                                                                                                        print("starting")
+                                                                                                                        r = 3
+
+                                                                                                            i = 0
+                                                                                                            trigg0 = 0
+                                                                                                            trigg1 = 1
+                                                                                                            if r == 2:
+                                                                                                                while i <= 10:
+                                                                                                                    import serial_comm
+                                                                                                                    if __name__ == "__main__":
+                                                                                                                        serial_comm.sensors()
+                                                                                                                    trigg0 = float(serial_comm.sens0) + float(trigg0)
+                                                                                                                    i = i + 1
+                                                                                                                    time.sleep(.2)
+                                                                                                                triggav0 = int(trigg0) / 11
+                                                                                                                print(f"triggered sensor 0 average = {triggav0}")
+                                                                                                                if float(triggav0) <= float(relav0) + float(error0):
+                                                                                                                    print("RESULTS INVALID")
+                                                                                                                else:
+                                                                                                                    print("RESULTS VALID")
+
+                                                                                                            else:
+                                                                                                                if r == 3:
+                                                                                                                    while i <= 10:
+                                                                                                                        import serial_comm
+                                                                                                                        if __name__ == "__main__":
+                                                                                                                            serial_comm.sensors()
+                                                                                                                        trigg1 = float(serial_comm.sens1) + float(trigg1)
+                                                                                                                        i = i + 1
+                                                                                                                        time.sleep(.2)
+                                                                                                                        print(trigg1)
+                                                                                                                    triggav1 = int(trigg1) / 11
+                                                                                                                    print(f"triggered sensor 1 average = {triggav1}")
+                                                                                                                    if float(triggav1) <= float(relav1) + float(error1):
+                                                                                                                        print("RESULTS INVALID")
+                                                                                                                    else:
+                                                                                                                        print("RESULTS VALID")
+
+                                                                                                            time.sleep(5)
+                                                                                                            print("==========================================================")
+                                                                                                            print("tighten the opposite arm now")
+                                                                                                            time.sleep(2)
+                                                                                                            if r == 2:
+                                                                                                                while r == 2:
+                                                                                                                    import serial_comm
+                                                                                                                    if __name__ == "__main__":
+                                                                                                                        serial_comm.sensors()
+                                                                                                                    if float(serial_comm.sens1) >= float(relav1) + float(error1) + .5:       # sensor 0
+                                                                                                                        print("sensor 1 triggered")
+                                                                                                                        print("starting")
+                                                                                                                        r = 4
+                                                                                                                        i = 0
+                                                                                                                        while i <= 10:
+                                                                                                                            import serial_comm
+                                                                                                                            if __name__ == "__main__":
+                                                                                                                                serial_comm.sensors()
+                                                                                                                            trigg1 = float(serial_comm.sens1) + float(trigg1)
+                                                                                                                            i = i + 1
+                                                                                                                            time.sleep(.2)
+                                                                                                                        triggav1 = int(trigg1) / 11
+                                                                                                                        print(f"triggered sensor 1 average = {triggav1}")
+                                                                                                                        if float(triggav1) <= float(relav1) + float(error1):
+                                                                                                                            print("RESULTS INVALID")
+                                                                                                                        else:
+                                                                                                                            print("RESULTS VALID")
+                                                                                                            else:
+                                                                                                                while r == 3:
+                                                                                                                    import serial_comm
+                                                                                                                    if __name__ == "__main__":
+                                                                                                                        serial_comm.sensors()
+                                                                                                                    if float(serial_comm.sens0) >= float(relav0) + float(error0) + .5:       # sensor 0
+                                                                                                                        print("sensor 0 triggered")
+                                                                                                                        print("starting")
+                                                                                                                        r = 4
+                                                                                                                        i = 0
+                                                                                                                        while i <= 10:
+                                                                                                                            import serial_comm
+                                                                                                                            if __name__ == "__main__":
+                                                                                                                                serial_comm.sensors()
+                                                                                                                            trigg0 = float(serial_comm.sens0) + float(trigg0)
+                                                                                                                            i = i + 1
+                                                                                                                            time.sleep(.2)
+                                                                                                                        triggav0 = int(trigg0) / 11
+                                                                                                                        print(f"triggered sensor 0 average = {triggav0}")
+                                                                                                                        if float(triggav0) <= float(relav0) + float(error0):
+                                                                                                                            print("RESULTS INVALID")
+                                                                                                                        else:
+                                                                                                                            print("RESULTS VALID")
+
+
+                                                                                                            print("Calibration complete!!")
+
+
                                                                                                             
-
-                                                                                                    
-
-                                                                                            
-                                                                                    
-                                                                                
-                                                                            
-
-
-                                                                    
-
-                                                            
-                                                        
-                                                            
                                             
                                         
 
 time.sleep(1)
+
