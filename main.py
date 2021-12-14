@@ -399,19 +399,34 @@ while run <= 100:
                                                                                                             trigg0 = 0
                                                                                                             trigg1 = 1
                                                                                                             if r == 2:
-                                                                                                                while i <= 10:
-                                                                                                                    import serial_comm
-                                                                                                                    if __name__ == "__main__":
-                                                                                                                        serial_comm.sensors()
-                                                                                                                    trigg0 = float(serial_comm.sens0) + float(trigg0)
-                                                                                                                    i = i + 1
-                                                                                                                    time.sleep(.2)
-                                                                                                                triggav0 = int(trigg0) / 11
-                                                                                                                print(f"triggered sensor 0 average = {triggav0}")
-                                                                                                                if float(triggav0) <= float(relav0) + float(error0):
-                                                                                                                    print("RESULTS INVALID")
-                                                                                                                else:
-                                                                                                                    print("RESULTS VALID")
+                                                                                                                def trigger0():
+                                                                                                                    while i <= 10:
+                                                                                                                        import serial_comm
+                                                                                                                        if __name__ == "__main__":
+                                                                                                                            serial_comm.sensors()
+                                                                                                                        trigg0 = float(serial_comm.sens0) + float(trigg0)
+                                                                                                                        i = i + 1
+                                                                                                                        time.sleep(.2)
+                                                                                                                        global triggav0
+                                                                                                                        triggav0 = int(trigg0) / 11
+                                                                                                                trigger0()                   #||
+                                                                                                                triggav0x0 = triggav0        #||
+                                                                                                                trigger0()                   #|| Calibration with multiple results
+                                                                                                                triggav0x1 = triggav0        #|| ETA. 8.8 sec
+                                                                                                                trigger0()                   #||
+                                                                                                                triggav0x2 = triggav0        #||
+                                                                                                                print(f"triggered sensor 0 average (3 data sets) = {triggav0x0}, {triggav0x1}, {triggav0x2}")
+                                                                                                                def validity_check0(variable):                                #||
+                                                                                                                    global valid0                                             #||
+                                                                                                                    if float(variable) <= float(relav0) + float(error0):      #||
+                                                                                                                        print(f"{variable} INVALID")                          #||
+                                                                                                                        print(f"terminating {variable}")                      #|| Validity check sens0
+                                                                                                                        valid0 = 1                                            #||
+                                                                                                                    else:                                                     #||
+                                                                                                                        print("triggav0 VALID")                               #||
+                                                                                                                        valid0 = 0                                            #||
+                                                                                                                validity_check0(triggav0x0)
+
 
                                                                                                             else:
                                                                                                                 if r == 3:
