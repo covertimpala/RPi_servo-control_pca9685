@@ -26,4 +26,9 @@ Once that is complete activate the RPi and install the files from this repositor
 
 Open the terminal on the RPi and type `ls /dev/tty*`, then plug the Arduino Uno to the RPi using a USB cable and repeat the command. Find the device that should now have appeared and remember it!
 
-Open serial_comm.py and replace `...` with the name you got.
+Open serial_comm.py and replace `/dev/ttyUSB0` with the name you got.
+
+Run serial_comm.py and check if any errors occur.
+
+(if you encounter an error please read [this tutorial](https://roboticsbackend.com/raspberry-pi-arduino-serial-communication/))
+
