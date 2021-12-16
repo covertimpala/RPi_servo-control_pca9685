@@ -30,5 +30,5 @@ Open serial_comm.py and replace `/dev/ttyUSB0` with the name you got.
 
 Run serial_comm.py and check if any errors occur.
 
-(if you encounter an error please read [this tutorial](https://roboticsbackend.com/raspberry-pi-arduino-serial-communication/))
+(if you encounter any errors please refer to [this tutorial](https://roboticsbackend.com/raspberry-pi-arduino-serial-communication/))
 
