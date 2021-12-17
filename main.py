@@ -367,48 +367,38 @@ while run <= 100:
                                                                                                                     serial_comm.sensors()
                                                                                                                 if float(serial_comm.sens0) >= float(relav0) + float(error0) + 1:       # sensor 0
                                                                                                                     print("sensor 0 triggered")
-                                                                                                                    print("starting in 5 sec")
-                                                                                                                    time.sleep(1)
-                                                                                                                    print("4")
-                                                                                                                    time.sleep(1)
-                                                                                                                    print("3")
-                                                                                                                    time.sleep(1)
-                                                                                                                    print("2")
-                                                                                                                    time.sleep(1)
-                                                                                                                    print("1")
-                                                                                                                    time.sleep(1)
-                                                                                                                    print("starting")
                                                                                                                     r = 2
                                                                                                                 else:
                                                                                                                     if float(serial_comm.sens1) >= float(relav0) + float(error0) + 1:   # sensor 1
                                                                                                                         print("sensor 1 triggered")
-                                                                                                                        print("starting in 5 sec")
-                                                                                                                        time.sleep(1)
-                                                                                                                        print("4")
-                                                                                                                        time.sleep(1)
-                                                                                                                        print("3")
-                                                                                                                        time.sleep(1)
-                                                                                                                        print("2")
-                                                                                                                        time.sleep(1)
-                                                                                                                        print("1")
-                                                                                                                        time.sleep(1)
-                                                                                                                        print("starting")
                                                                                                                         r = 3
+
+                                                                                                            print("starting in 5 sec")
+                                                                                                            time.sleep(1)
+                                                                                                            print("4")
+                                                                                                            time.sleep(1)
+                                                                                                            print("3")
+                                                                                                            time.sleep(1)
+                                                                                                            print("2")
+                                                                                                            time.sleep(1)
+                                                                                                            print("1")
+                                                                                                            time.sleep(1)
+                                                                                                            print("starting")
 
                                                                                                             i = 0
                                                                                                             trigg0 = 0
                                                                                                             trigg1 = 1
                                                                                                             if r == 2:
-                                                                                                                def trigger0():
-                                                                                                                    while i <= 10:
-                                                                                                                        import serial_comm
-                                                                                                                        if __name__ == "__main__":
-                                                                                                                            serial_comm.sensors()
-                                                                                                                        trigg0 = float(serial_comm.sens0) + float(trigg0)
-                                                                                                                        i = i + 1
-                                                                                                                        time.sleep(.2)
-                                                                                                                        global triggav0
-                                                                                                                        triggav0 = int(trigg0) / 11
+                                                                                                                def trigger0():                                                  #||
+                                                                                                                    while i <= 10:                                               #||
+                                                                                                                        import serial_comm                                       #||
+                                                                                                                        if __name__ == "__main__":                               #||
+                                                                                                                            serial_comm.sensors()                                #|| Data collection from sensor 0
+                                                                                                                        trigg0 = float(serial_comm.sens0) + float(trigg0)        #||
+                                                                                                                        i = i + 1                                                #||
+                                                                                                                        time.sleep(.2)                                           #||
+                                                                                                                        global triggav0                                          #||
+                                                                                                                        triggav0 = int(trigg0) / 11   # Average                   ||
                                                                                                                 trigger0()                   #||
                                                                                                                 triggav0x0 = triggav0        #||
                                                                                                                 trigger0()                   #|| Calibration with multiple results
@@ -425,7 +415,21 @@ while run <= 100:
                                                                                                                     else:                                                     #||
                                                                                                                         print("triggav0 VALID")                               #||
                                                                                                                         valid0 = 0                                            #||
-                                                                                                                validity_check0(triggav0x0)
+                                                                            #====================================================================================================
+                                                                                                                validity_check0(triggav0x0)           #||
+                                                                                                                if valid0 == 1:                       #||
+                                                                                                                    triggav0x0 = 0                    #||
+                                                                                                                                                      #||
+                                                                                                                validity_check0(triggav0x1)           #||
+                                                                                                                if valid0 == 1:                       #||  Data manipulation
+                                                                                                                    triggav0x1 = 0                    #||
+                                                                                                                                                      #||
+                                                                                                                validity_check0(triggav0x2)           #||
+                                                                                                                if valid0 == 1:                       #||
+                                                                                                                    triggav0x2 = 0                    #||
+                                                                                                                
+
+                                                                                                                
 
 
                                                                                                             else:
