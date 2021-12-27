@@ -394,18 +394,19 @@ while run <= 100:
                                                                                                                         import serial_comm                                       #||
                                                                                                                         if __name__ == "__main__":                               #||
                                                                                                                             serial_comm.sensors()                                #|| Data collection from sensor 0
-                                                                                                                        trigg0 = float(serial_comm.sens0) + float(trigg0)        #||
+                                                                                                                        trigg0 = float(serial_comm.sens0) + float(trigg0)        #|| ETA 2.2 sec
                                                                                                                         i = i + 1                                                #||
                                                                                                                         time.sleep(.2)                                           #||
                                                                                                                         global triggav0                                          #||
                                                                                                                         triggav0 = int(trigg0) / 11   # Average                   ||
-                                                                                                                trigger0()                   #||
-                                                                                                                triggav0x0 = triggav0        #||
-                                                                                                                trigger0()                   #|| Calibration with multiple results
-                                                                                                                triggav0x1 = triggav0        #|| ETA. 8.8 sec
-                                                                                                                trigger0()                   #||
-                                                                                                                triggav0x2 = triggav0        #||
-                                                                                                                print(f"triggered sensor 0 average (3 data sets) = {triggav0x0}, {triggav0x1}, {triggav0x2}")
+                                                                                                            #-----------------------------------------------------------------------
+                                                                                                                lev = 1                           #||
+                                                                                                                for q in range(10):               #||
+                                                                                                                    trigger0()                    #|| Data storage
+                                                                                                                    import json_encoder0          #||
+                                                                                                                    lev = lev+1                   #||
+
+                                                                                                                print(f"data stored on json file: data.json")
                                                                                                                 def validity_check0(variable):                                #||
                                                                                                                     global valid0                                             #||
                                                                                                                     if float(variable) <= float(relav0) + float(error0):      #||
@@ -427,6 +428,9 @@ while run <= 100:
                                                                                                                 validity_check0(triggav0x2)           #||
                                                                                                                 if valid0 == 1:                       #||
                                                                                                                     triggav0x2 = 0                    #||
+                                                                                                                #++++++++++++++++++++++++++++++++++++++++
+                                                                                                                def avvar0():
+                                                                                                                    print("hi")
                                                                                                                 
 
                                                                                                                 
@@ -502,6 +506,51 @@ while run <= 100:
 
 
                                                                                                             print("Calibration complete!!")
+
+
+                                                                                else:
+                                                                                    if key == "serial speed":
+                                                                                        print("speed options:")
+                                                                                        print("within range 0 - 200 (BETA) (UNAVAILABLE)")
+                                                                                        print("or AUTO (BETA) (UNAVAILABLE)")
+                                                                                        ardspeed = input()
+
+                                                                                        if ardspeed == "AUTO" or "auto":
+                                                                                            print("starting RPi to Arduino 2 way collaboration")
+                                                                                            if __name__ == '__main__':
+                                                                                                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+                                                                                                ser.reset_input_buffer()
+                                                                                                while True:
+                                                                                                    ser.write(b"auto\n")
+                                                                                                    line = ser.readline().decode('utf-8').rstrip()
+                                                                                                    print(line)
+                                                                                                    time.sleep(1)
+                                                                                        else:
+                                                                                            print("starting RPi to Arduino 2 way collaboration")
+                                                                                            if __name__ == '__main__':
+                                                                                                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+                                                                                                ser.reset_input_buffer()
+                                                                                                while True:
+                                                                                                    ser.write(f"{ardspeed}\n")
+                                                                                                    line = ser.readline().decode('utf-8').rstrip()
+                                                                                                    print(line)
+                                                                                                    time.sleep(1)
+
+
+
+                                                                                    else:
+                                                                                        if key == "measurements":
+                                                                                            for w in range(50):
+                                                                                                import serial_comm
+                                                                                                if __name__ == "__main__":
+                                                                                                    serial_comm.sensors()
+                                                                                                print(serial_comm.sens0)
+                                                                                                print(serial_comm.sens1)
+                                                                                                time.sleep(.1)
+
+
+
+
 
 
                                                                                                             
