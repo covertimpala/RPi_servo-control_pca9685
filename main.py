@@ -405,8 +405,9 @@ while run <= 100:
                                                                                                                     trigger0()                    #|| Data storage
                                                                                                                     import json_encoder0          #||
                                                                                                                     lev = lev+1                   #||
-
-                                                                                                                print(f"data stored on json file: data.json")
+                                                                                                            #----------------------------------------
+                                                                                                                print(f"data stored in file: data.json")
+                                                                                                            #--------------------------------------------------------------------
                                                                                                                 def validity_check0(variable):                                #||
                                                                                                                     global valid0                                             #||
                                                                                                                     if float(variable) <= float(relav0) + float(error0):      #||
@@ -417,17 +418,16 @@ while run <= 100:
                                                                                                                         print("triggav0 VALID")                               #||
                                                                                                                         valid0 = 0                                            #||
                                                                             #====================================================================================================
-                                                                                                                validity_check0(triggav0x0)           #||
-                                                                                                                if valid0 == 1:                       #||
-                                                                                                                    triggav0x0 = 0                    #||
-                                                                                                                                                      #||
-                                                                                                                validity_check0(triggav0x1)           #||
-                                                                                                                if valid0 == 1:                       #||  Data manipulation
-                                                                                                                    triggav0x1 = 0                    #||
-                                                                                                                                                      #||
-                                                                                                                validity_check0(triggav0x2)           #||
-                                                                                                                if valid0 == 1:                       #||
-                                                                                                                    triggav0x2 = 0                    #||
+                                                                                                                av0 = 0                            #||
+                                                                                                                import length                      #||
+                                                                                                                from length import file_length     #||
+                                                                                                                for ref in range(file_length):     #||
+                                                                                                                    import json_reader             #|| Data verification and averaging
+                                                                                                                    from json_reader import val    #||
+                                                                                                                    validity_check0(val)           #||
+                                                                                                                    if valid0 == 0:                #||
+                                                                                                                        av0 = av0 + val            #||
+                                                                                                                
                                                                                                                 #++++++++++++++++++++++++++++++++++++++++
                                                                                                                 def avvar0():
                                                                                                                     print("hi")
