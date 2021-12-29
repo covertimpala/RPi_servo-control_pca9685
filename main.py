@@ -400,6 +400,7 @@ while run <= 100:
                                                                                                                         global triggav0                                          #||
                                                                                                                         triggav0 = int(trigg0) / 11   # Average                   ||
                                                                                                             #-----------------------------------------------------------------------
+                                                                                                                jsonfile = 'data.txt'
                                                                                                                 lev = 1                           #||
                                                                                                                 for q in range(10):               #||
                                                                                                                     trigger0()                    #|| Data storage
@@ -427,7 +428,9 @@ while run <= 100:
                                                                                                                     validity_check0(val)           #||
                                                                                                                     if valid0 == 0:                #||
                                                                                                                         av0 = av0 + val            #||
-                                                                                                                
+                                                                                                                    else:
+                                                                                                                        jsonfile = 'invalid.txt'
+                                                                                                                av0 = av0 / file_length
                                                                                                                 #++++++++++++++++++++++++++++++++++++++++
                                                                                                                 def avvar0():
                                                                                                                     print("hi")

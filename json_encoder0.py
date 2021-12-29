@@ -1,6 +1,5 @@
 import json
-import random
-#from __main__ import lev, triggav0
+from __main__ import lev, triggav0
 
 lev = 9
 triggav0 = 79
