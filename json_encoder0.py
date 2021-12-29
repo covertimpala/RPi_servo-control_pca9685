@@ -1,8 +1,9 @@
 import json
+import random
 #from __main__ import lev, triggav0
 
-lev = 2
-triggav0 = 78
+lev = 9
+triggav0 = 79
 
 def data0(level, value):
     with open('data.json', 'r+') as f:
@@ -15,4 +16,12 @@ def data0(level, value):
         
 
 data0(lev, triggav0) # implementing vars from __main__ into function
-print(data[lev]) # accessing data using ref num (lev value)
+print(lev)
+
+with open('data.json', 'r+') as f:          #||
+    global data                             #||
+    data = json.load(f)                     #||
+    data['end'] = 'value'                   #|| Indicates end in file and avoids software from making duplicates
+    f.seek(0)                               #||
+    json.dump(data, f, indent=4)            #||
+    f.truncate()                            #||
