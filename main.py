@@ -400,7 +400,7 @@ while run <= 100:
                                                                                                                         global triggav0                                          #||
                                                                                                                         triggav0 = int(trigg0) / 11   # Average                   ||
                                                                                                             #-----------------------------------------------------------------------
-                                                                                                                jsonfile = 'data.txt'
+                                                                                                                jsonfile = 'data.json'
                                                                                                                 lev = 1                           #||
                                                                                                                 for q in range(10):               #||
                                                                                                                     trigger0()                    #|| Data storage
@@ -411,7 +411,7 @@ while run <= 100:
                                                                                                             #--------------------------------------------------------------------
                                                                                                                 def validity_check0(variable):                                #||
                                                                                                                     global valid0                                             #||
-                                                                                                                    if float(variable) <= float(relav0) + float(error0):      #||
+                                                                                                                    if float(variable) <= float(relav0) + float(error0) + .5: #||
                                                                                                                         print(f"{variable} INVALID")                          #||
                                                                                                                         print(f"terminating {variable}")                      #|| Validity check sens0
                                                                                                                         valid0 = 1                                            #||
@@ -419,6 +419,7 @@ while run <= 100:
                                                                                                                         print("triggav0 VALID")                               #||
                                                                                                                         valid0 = 0                                            #||
                                                                             #====================================================================================================
+                                                                                                                largestval0 = 0
                                                                                                                 av0 = 0                            #||
                                                                                                                 import length                      #||
                                                                                                                 from length import file_length     #||
@@ -428,17 +429,19 @@ while run <= 100:
                                                                                                                     validity_check0(val)           #||
                                                                                                                     if valid0 == 0:                #||
                                                                                                                         av0 = av0 + val            #||
+                                                                                                                        if val >= largestval0:     #| sets data range
+                                                                                                                            largestval0 = val      #| sets data range
                                                                                                                     else:
-                                                                                                                        jsonfile = 'invalid.txt'
+                                                                                                                        jsonfile = 'invalid.json'  # Currently has no function
+                                                                                                                        print(ref, 'invalid')
                                                                                                                 av0 = av0 / file_length
                                                                                                                 #++++++++++++++++++++++++++++++++++++++++
-                                                                                                                def avvar0():
-                                                                                                                    print("hi")
-                                                                                                                
+                                                                                                                if largestval0 - av0 >= float(relav0) + float(error0) + .5:
+                                                                                                                    print('hi')
+
+
 
                                                                                                                 
-
-
                                                                                                             else:
                                                                                                                 if r == 3:
                                                                                                                     while i <= 10:
