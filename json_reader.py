@@ -1,11 +1,13 @@
 import json
-from __main__ import ref
+import __main__
 
 
-with open('data.json', 'r+') as f:
-    data = json.load(f)
-    f.seek(0)
+def readfile():
+    with open('data.json', 'r+') as f:
+        data = json.load(f)
+        f.seek(0)
 
-print("ref num:", ref)
-val = data[str(ref)]   # data extraction using ref string
-print(val)
+    print("ref num:", __main__.ref)
+    global val
+    val = data[str(__main__.ref)]   # data extraction using ref string
+    print(val)

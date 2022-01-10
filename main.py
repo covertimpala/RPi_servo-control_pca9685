@@ -417,7 +417,7 @@ while run <= 100:
                                                                                                                         triggav0 = int(trigg0) / 11   # Average                   ||
                                                                                                             #-----------------------------------------------------------------------
                                                                                                                 jsonfile = 'data.json'
-                                                                                                                lev = 1                           #||
+                                                                                                                lev = 0                           #||
                                                                                                                 for q in range(19):               #||
                                                                                                                     print(lev,':')                #||
                                                                                                                     trigger0()                    #|| Data storage
@@ -439,17 +439,17 @@ while run <= 100:
                                                                                                                         valid0 = 0                                            #||
                                                                             #====================================================================================================
                                                                                                                 largestval0 = 0
-                                                                                                                av0 = 0                            #||
-                                                                                                                import length                      #||
-                                                                                                                from length import file_length     #||
-                                                                                                                for ref in range(file_length):     #||
-                                                                                                                    import json_reader             #|| Data verification and averaging
-                                                                                                                    from json_reader import val    #||
-                                                                                                                    validity_check0(val)           #||
-                                                                                                                    if valid0 == 0:                #||
-                                                                                                                        av0 = av0 + val            #||
-                                                                                                                        if val >= largestval0:     #| sets data range
-                                                                                                                            largestval0 = val      #| sets data range
+                                                                                                                av0 = 0                                       #||
+                                                                                                                import length                                 #||
+                                                                                                                from length import file_length                #||
+                                                                                                                for ref in range(file_length):                #||
+                                                                                                                    import json_reader                        #|| Data verification and averaging
+                                                                                                                    json_reader.readfile()                    #||
+                                                                                                                    validity_check0(json_reader.val)          #||
+                                                                                                                    if valid0 == 0:                           #||
+                                                                                                                        av0 = av0 + json_reader.val           #||
+                                                                                                                        if json_reader.val >= largestval0:     #| sets data range
+                                                                                                                            largestval0 = json_reader.val      #| sets data range
                                                                                                                     else:
                                                                                                                         jsonfile = 'invalid.json'  # Currently has no function
                                                                                                                         print(ref, 'invalid')

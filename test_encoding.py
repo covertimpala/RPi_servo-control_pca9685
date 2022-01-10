@@ -27,15 +27,25 @@ def trigger0():                                                  #||
         triggav0 = int(trigg0) / 11   # Average                   ||
 
 #########################################################################
-lev = 1                           #||                                   |S
+lev = 0                           #||                                   |S
 for q in range(19):               #||                                   |T
     print(lev,':')                #||                                   |O
     trigger0()                    #|| Data storage                      |R
     data0(lev, triggav0) # implementing vars to function                |A
     print(triggav0)               #||                                   |G
     lev = lev+1                   #||                                   |E
-    time.sleep(1)                 #||                                   |!
+
 #########################################################################
 data0('end', 'value') # Prevents duplicate values   |Completion
 print('Complete') #                                 |
 #####################################################
+
+print('press enter to test data reading')
+input()
+av0 = 0
+import length
+from length import file_length
+for ref in range(file_length):
+    import json_reader
+    json_reader.readfile()
+    print(ref,':', json_reader.val)
