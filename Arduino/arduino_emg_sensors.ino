@@ -20,4 +20,3 @@ void loop() {
   String comb = String(voltage0) + String(",") + voltage1;
   Serial.println(comb);
   delay(200);
-}

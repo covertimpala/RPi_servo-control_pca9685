@@ -1,8 +1,14 @@
+print("starting")
 import json
 from __main__ import lev, triggav0, jsonfile   #| imports variables from main file
 
+
+
 #lev = 9          #|For testing and troubleshooting
 #triggav0 = 79    #|For testing and troubleshooting
+
+print(lev)
+print(triggav0)
 
 def data0(level, value):
     with open('data.json', 'r+') as f:

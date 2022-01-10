@@ -1,5 +1,5 @@
 import time
-import subprocess
+import json
 import board
 import busio
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -389,25 +389,44 @@ while run <= 100:
                                                                                                             trigg0 = 0
                                                                                                             trigg1 = 1
                                                                                                             if r == 2:
+
+                                                                                                                ########################################################################## ENCODING START
+
+
+                                                                                                                def data0(level, value):
+                                                                                                                    with open('data.json', 'r+') as f:
+                                                                                                                        global data
+                                                                                                                        data = json.load(f)
+                                                                                                                        data[level] = value # <--- data[ref] = measurements
+                                                                                                                        f.seek(0)        # <--- resets file position to the beginning
+                                                                                                                        json.dump(data, f, indent=4)
+                                                                                                                        f.truncate()
+                                                                                                                
+                                                                                                                
+                                                                                                                ########################################################################## ENCODING END
+
+
                                                                                                                 def trigger0():                                                  #||
-                                                                                                                    while i <= 10:                                               #||
+                                                                                                                    for i in range(10):                                          #||
                                                                                                                         import serial_comm                                       #||
                                                                                                                         if __name__ == "__main__":                               #||
                                                                                                                             serial_comm.sensors()                                #|| Data collection from sensor 0
                                                                                                                         trigg0 = float(serial_comm.sens0) + float(trigg0)        #|| ETA 2.2 sec
-                                                                                                                        i = i + 1                                                #||
                                                                                                                         time.sleep(.2)                                           #||
                                                                                                                         global triggav0                                          #||
                                                                                                                         triggav0 = int(trigg0) / 11   # Average                   ||
                                                                                                             #-----------------------------------------------------------------------
                                                                                                                 jsonfile = 'data.json'
                                                                                                                 lev = 1                           #||
-                                                                                                                for q in range(10):               #||
+                                                                                                                for q in range(19):               #||
+                                                                                                                    print(lev,':')                #||
                                                                                                                     trigger0()                    #|| Data storage
-                                                                                                                    import json_encoder0          #||
+                                                                                                                    data0(lev, triggav0)          #||
+                                                                                                                    print(triggav0)               #||
                                                                                                                     lev = lev+1                   #||
                                                                                                             #----------------------------------------
-                                                                                                                print(f"data stored in file: data.json")
+                                                                                                                data0('end', 'value') # Prevents duplicates  |Completion
+                                                                                                                print(f"data stored in file: data.json")#    |
                                                                                                             #--------------------------------------------------------------------
                                                                                                                 def validity_check0(variable):                                #||
                                                                                                                     global valid0                                             #||
@@ -437,7 +456,9 @@ while run <= 100:
                                                                                                                 av0 = av0 / file_length
                                                                                                                 #++++++++++++++++++++++++++++++++++++++++
                                                                                                                 if largestval0 - av0 >= float(relav0) + float(error0) + .5:
-                                                                                                                    print('hi')
+                                                                                                                    largestval0 = av0 - (float(relav0) + float(error0) + .5) # sets largest val to the most valid response
+                                                                                                                
+
 
 
 
