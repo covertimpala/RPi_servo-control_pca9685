@@ -407,6 +407,7 @@ while run <= 100:
 
 
                                                                                                                 def trigger0():                                                  #||
+                                                                                                                    trigg0 = 0
                                                                                                                     for i in range(10):                                          #||
                                                                                                                         import serial_comm                                       #||
                                                                                                                         if __name__ == "__main__":                               #||
