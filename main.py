@@ -246,7 +246,13 @@ while run <= 100:
                                                                                 
                                                                                 if __name__ == "__main__":
                                                                                     serial_comm.sensors()
-                                                                                    if float(serial_comm.sens0) <= float(relav0) + float(error0):
+                                                                                    ####
+                                                                                    if float(serial_comm.sens1) <= float(relav1) + float(error1):
+                                                                                        status1 = "IDLE"
+                                                                                    else:
+                                                                                        status1 = "ACTIVE"
+                                                                                        ####
+                                                                                    if float(serial_comm.sens0) <= float(relav0) + float(error0)+.5:
                                                                                         status0 = "IDLE"
                                                                                         statsense = 0
                                                                                     else:
@@ -274,8 +280,10 @@ while run <= 100:
                                                                                     if status1 == "IDLE":
                                                                                         if int(float(serial_comm.sens0)) >= float(triggav0) + float(error0):
                                                                                             current_angle = round(int(kit.servo[emgservo].angle))
-                                                                                            if kit.servo[emgservo].actuation_range >= int(current_angle + 4):
-                                                                                                kit.servo[emgservo].angle = int(current_angle + 5)
+                                                                                            if kit.servo[emgservo].actuation_range >= int(current_angle + 5):
+                                                                                                kit.servo[emgservo].angle = int(current_angle + 4)
+                                                                                            else:
+                                                                                                print("maxangle reached")
 
                                                                                     if status0 == "IDLE":
                                                                                         if int(float(serial_comm.sens1)) >= float(triggav1) + float(error1):
