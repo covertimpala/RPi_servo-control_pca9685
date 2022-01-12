@@ -122,8 +122,7 @@ while run <= 100:
 
                                 else:
                                     if key == "test":
-                                        import testsubprocess
-                                        import testsub2
+                                        print("this function is no longer available")
 
                                     else:
                                         if key == "angle":
