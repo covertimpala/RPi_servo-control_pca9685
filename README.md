@@ -32,3 +32,11 @@ Run serial_comm.py and check if any errors occur.
 
 (if you encounter any errors please refer to [this tutorial](https://roboticsbackend.com/raspberry-pi-arduino-serial-communication/))
 
+If no errors occur then you can open main.py and run it, then type `calibrate` and follow the instructions you are given.
+
+### EMG Commands
+`calibrate` - calibrates software so that you get better control (NOTE: This command has to be typed in first for other EMG commands to work)
+
+`emg on` - Activates EMG sensing for robotic arm
+
+`emg off` - Deactivates EMG sensing for robotic arm
