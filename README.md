@@ -20,6 +20,23 @@ In this project the EMG signals are used to control a robotic arm.
 
 The setup used here is an Arduino Uno, RPi, two myoware EMG sensors and a PCA9685 along with six servos labeled 0 - 5.
 
+#### Connecting RPi and PCA9685:
+```
+3.3v - vcc
+GPIO 2 (SDA) - SDA
+GPIO 3 (SCL) - SCL
+GND - GND
+```
+![RPi and PCA9685 wiring](https://cdn.hashnode.com/res/hashnode/image/upload/v1633632430551/OuzP28ycS.png)
+
+
+---
+
+### To connect Arduino UNO and myoware sensors please refer to [this manual](https://cdn.sparkfun.com/datasheets/Sensors/Biometric/MyowareUserManualAT-04-001.pdf)
+
+---
+
+
 Upload the measurements.ino file to the Arduino and connect the myoware sensors to pins A0 and A1.
 
 Once that is complete activate the RPi and install the files from this repository.
@@ -30,9 +47,9 @@ Open serial_comm.py and replace `/dev/ttyUSB0` with the name you got.
 
 Run serial_comm.py and check if any errors occur.
 
-(if you encounter any errors please refer to [this tutorial](https://roboticsbackend.com/raspberry-pi-arduino-serial-communication/))
+(if you encounter any errors or need a more detailed guide please refer to [this tutorial](https://roboticsbackend.com/raspberry-pi-arduino-serial-communication/))
 
-If no errors occur then you can open main.py and run it, then type `calibrate` and follow the instructions you are given.
+If no errors occur then you can open main.py and run it, then type `calibrate` and follow the instructions that appear.
 
 ### EMG Commands
 `calibrate` - calibrates software so that you get better control (NOTE: This command has to be typed in first for other EMG commands to work)
