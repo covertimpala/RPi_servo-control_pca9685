@@ -42,12 +42,14 @@ while p <= 10:
 
         ################################################################################    ENCODING FINISH
         
-        def trigger0():
+        def trigger0(sensor):
             global triggav0
             triggav0 = 0                                                 #||
             for i in range(10):                                          #||
+                import T_randomvals
+                T_randomvals.randomvalue()
                 global trigg0
-                trigg0 = random.uniform(0.5, 5)                             #||  Data collection
+                trigg0 = sensor                          #||  Data collection   #random.uniform(.5, 5)
                 print(trigg0)
                                                           #||
                 triggav0 = triggav0 + trigg0
@@ -58,7 +60,9 @@ while p <= 10:
         lev = 0                           #||                                   |S
         for q in range(19):               #||                                   |T
             print(lev,':')                #||                                   |O
-            trigger0()                    #|| Data storage                      |R
+            import T_randomvals
+            T_randomvals.randomvalue()
+            trigger0(T_randomvals.sens0)                    #|| Data storage                      |R
             triggav0 = int(triggav0) / 10
             data0(lev, triggav0) # implementing vars to function                |A
             print(triggav0)               #||                                   |G
@@ -148,3 +152,11 @@ while p <= 10:
                     if key == "reply test":
                         print("hi")
     
+                    else:
+                        if key == 'var':
+                            global testvar
+                            testvar = 1
+                            import test3
+                            test3.test(testvar)
+                            testvar = 2
+                            test3.test(testvar)

@@ -304,6 +304,9 @@ while run <= 100:
                                                                             else:
                                                                                 if key == "calibrate":
                                                                                     i = 0
+                                                                                    global relav0
+                                                                                    global relav1
+                                                                                    global error0
                                                                                     relav0 = 0
                                                                                     relav1 = 0
                                                                                     r = 0
@@ -395,13 +398,18 @@ while run <= 100:
                                                                                                             i = 0
                                                                                                             trigg0 = 0
                                                                                                             trigg1 = 1
+                                                                                                            global jsonfile
+                                                                                                            jsonfile = "data.json"
                                                                                                             if r == 2:
+
+
+                                                                                                                # /-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\ STAGE 1 /-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
 
                                                                                                                 ########################################################################## ENCODING START
 
 
                                                                                                                 def data0(level, value):
-                                                                                                                    with open('data.json', 'r+') as f:
+                                                                                                                    with open(jsonfile, 'r+') as f:  # open(data.json, 'r+')
                                                                                                                         global data
                                                                                                                         data = json.load(f)
                                                                                                                         data[level] = value # <--- data[ref] = measurements
@@ -413,29 +421,59 @@ while run <= 100:
                                                                                                                 ########################################################################## ENCODING END
 
 
-                                                                                                                def trigger0():                                                  #||
+                                                                                                                def trigger0(sensor):                                                  #||
                                                                                                                     trigg0 = 0
                                                                                                                     for i in range(10):                                          #||
                                                                                                                         import serial_comm                                       #||
                                                                                                                         if __name__ == "__main__":                               #||
                                                                                                                             serial_comm.sensors()                                #|| Data collection from sensor 0
-                                                                                                                        trigg0 = float(serial_comm.sens0) + float(trigg0)        #|| ETA 2.2 sec
+                                                                                                                        trigg0 = float(sensor) + float(trigg0)        #|| ETA 2.2 sec
                                                                                                                         time.sleep(.2)                                           #||
                                                                                                                         global triggav0                                          #||
                                                                                                                         triggav0 = int(trigg0) / 11   # Average                   ||
                                                                                                             #-----------------------------------------------------------------------
-                                                                                                                jsonfile = 'data.json'
-                                                                                                                lev = 0                           #||
-                                                                                                                for q in range(19):               #||
-                                                                                                                    print(lev,':')                #||
-                                                                                                                    trigger0()                    #|| Data storage
-                                                                                                                    data0(lev, triggav0)          #||
-                                                                                                                    print(triggav0)               #||
-                                                                                                                    lev = lev+1                   #||
-                                                                                                            #----------------------------------------
-                                                                                                                data0('end', 'value') # Prevents duplicates  |Completion
-                                                                                                                print(f"data stored in file: data.json")#    |
-                                                                                                            #--------------------------------------------------------------------
+                                                                                                                
+                                                                                                                def dat_gath_stor(sensor):
+                                                                                                                    lev = 0                           #||
+                                                                                                                    for q in range(19):               #||
+                                                                                                                        print(lev,':')                #||
+                                                                                                                        trigger0(sensor)                    #|| Data storage
+                                                                                                                        data0(lev, triggav0)          #||
+                                                                                                                        print(triggav0)               #||
+                                                                                                                        lev = lev+1                   #||
+                                                                                                                    #----------------------------------------
+                                                                                                                    data0('end', 'value') # Prevents duplicates  |Completion
+                                                                                                                    print(f"data stored in file: {jsonfile}")#    |
+                                                                                                                    #--------------------------------------------------------------------
+
+
+
+                                                                                                                #==============================================
+                                                                                                                #------------------ Sensor 0 ------------------
+                                                                                                                #==============================================
+
+                                                                                                                jsonfile = 'data.json'   #||
+                                                                                                                serial_comm.sensors()    #||
+                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
+                                                                                                                dat_gath_stor(serial_comm.sens0)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
+                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
+
+
+
+                                                                                                                #==============================================
+                                                                                                                #------------------ Sensor 1 ------------------
+                                                                                                                #==============================================
+
+                                                                                                                jsonfile = 'data2.json'  #||
+                                                                                                                serial_comm.sensors()    #||
+                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
+                                                                                                                dat_gath_stor(serial_comm.sens1)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
+                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
+
+
+
+                                                                                                                #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\ Stage 2 /-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
+
                                                                                                                 def validity_check0(variable):                                #||
                                                                                                                     global valid0                                             #||
                                                                                                                     if float(variable) <= float(relav0) + float(error0) + .5: #||
@@ -448,9 +486,10 @@ while run <= 100:
                                                                             #====================================================================================================
                                                                                                                 largestval0 = 0
                                                                                                                 av0 = 0                                       #||
-                                                                                                                import length                                 #||
-                                                                                                                from length import file_length                #||
-                                                                                                                for ref in range(file_length):                #||
+                                                                                                                #||
+                                                                                                                
+                                                                                                                # from length import file_length
+                                                                                                                for ref in range(19):                #||
                                                                                                                     import json_reader                        #|| Data verification and averaging
                                                                                                                     json_reader.readfile()                    #||
                                                                                                                     validity_check0(json_reader.val)          #||
@@ -461,7 +500,7 @@ while run <= 100:
                                                                                                                     else:
                                                                                                                         jsonfile = 'invalid.json'  # Currently has no function
                                                                                                                         print(ref, 'invalid')
-                                                                                                                av0 = av0 / file_length
+                                                                                                                av0 = av0 / 19
                                                                                                                 #++++++++++++++++++++++++++++++++++++++++
                                                                                                                 if largestval0 - av0 >= float(relav0) + float(error0) + .5:
                                                                                                                     largestval0 = av0 - (float(relav0) + float(error0) + .5) # sets largest val to the most valid response
