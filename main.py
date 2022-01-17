@@ -421,13 +421,13 @@ while run <= 100:
                                                                                                                 ########################################################################## ENCODING END
 
 
-                                                                                                                def trigger0(sensor):                                                  #||
-                                                                                                                    trigg0 = 0
+                                                                                                                def trigger0(sensor):                                            #||
+                                                                                                                    trigg0 = 0                                                   #||
                                                                                                                     for i in range(10):                                          #||
                                                                                                                         import serial_comm                                       #||
                                                                                                                         if __name__ == "__main__":                               #||
                                                                                                                             serial_comm.sensors()                                #|| Data collection from sensor 0
-                                                                                                                        trigg0 = float(sensor) + float(trigg0)        #|| ETA 2.2 sec
+                                                                                                                        trigg0 = float(sensor) + float(trigg0)                   #|| ETA 2.2 sec
                                                                                                                         time.sleep(.2)                                           #||
                                                                                                                         global triggav0                                          #||
                                                                                                                         triggav0 = int(trigg0) / 11   # Average                   ||
