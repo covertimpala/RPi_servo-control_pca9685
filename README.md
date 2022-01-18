@@ -34,7 +34,7 @@ GND - GND
 
 ### To connect Arduino UNO and myoware sensors please refer to [this manual](https://cdn.sparkfun.com/datasheets/Sensors/Biometric/MyowareUserManualAT-04-001.pdf)
 
-To avoid risk of electric shock please use an isolated circuit
+# To avoid risk of electric shock please use an isolated circuit
 ---
 
 
