@@ -437,8 +437,8 @@ while run <= 100:
                                                                                                                     lev = 0                           #||
                                                                                                                     for q in range(19):               #||
                                                                                                                         print(lev,':')                #||
-                                                                                                                        trigger0(sensor)                    #|| Data storage
-                                                                                                                        data0(lev, triggav0)          #||
+                                                                                                                        trigger0(sensor)              #|| Data storage
+                                                                                                                        data0(lev, triggav0)          #|| ETA 41.8 sec
                                                                                                                         print(triggav0)               #||
                                                                                                                         lev = lev+1                   #||
                                                                                                                     #----------------------------------------
