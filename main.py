@@ -370,7 +370,7 @@ while run <= 100:
                                                                                                             print("RESULTS VALID")
                                                                                                             time.sleep(2)
                                                                                                             print("==========================================================")
-                                                                                                            print("Tighten one arm")
+                                                                                                            print("Tighten sensor 0")
                                                                                                             while r == 1:
                                                                                                                 import serial_comm
                                                                                                                 if __name__ == "__main__":
@@ -378,10 +378,7 @@ while run <= 100:
                                                                                                                 if float(serial_comm.sens0) >= float(relav0) + float(error0) + 1:       # sensor 0
                                                                                                                     print("sensor 0 triggered")
                                                                                                                     r = 2
-                                                                                                                else:
-                                                                                                                    if float(serial_comm.sens1) >= float(relav0) + float(error0) + 1:   # sensor 1
-                                                                                                                        print("sensor 1 triggered")
-                                                                                                                        r = 3
+
 
                                                                                                             print("starting in 5 sec")
                                                                                                             time.sleep(1)
@@ -448,27 +445,6 @@ while run <= 100:
 
 
 
-                                                                                                                #==============================================
-                                                                                                                #------------------ Sensor 0 ------------------
-                                                                                                                #==============================================
-
-                                                                                                                jsonfile = 'data.json'   #||
-                                                                                                                serial_comm.sensors()    #||
-                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
-                                                                                                                dat_gath_stor(serial_comm.sens0)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
-                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
-
-
-
-                                                                                                                #==============================================
-                                                                                                                #------------------ Sensor 1 ------------------
-                                                                                                                #==============================================
-
-                                                                                                                jsonfile = 'data2.json'  #||
-                                                                                                                serial_comm.sensors()    #||
-                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
-                                                                                                                dat_gath_stor(serial_comm.sens1)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
-                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
 
 
 
@@ -489,97 +465,70 @@ while run <= 100:
                                                                                                                 #||
                                                                                                                 
                                                                                                                 # from length import file_length
-                                                                                                                for ref in range(19):                #||
-                                                                                                                    import json_reader                        #|| Data verification and averaging
-                                                                                                                    json_reader.readfile()                    #||
-                                                                                                                    validity_check0(json_reader.val)          #||
-                                                                                                                    if valid0 == 0:                           #||
-                                                                                                                        av0 = av0 + json_reader.val           #||
-                                                                                                                        if json_reader.val >= largestval0:     #| sets data range
-                                                                                                                            largestval0 = json_reader.val      #| sets data range
-                                                                                                                    else:
-                                                                                                                        jsonfile = 'invalid.json'  # Currently has no function
-                                                                                                                        print(ref, 'invalid')
-                                                                                                                av0 = av0 / 19
-                                                                                                                #++++++++++++++++++++++++++++++++++++++++
-                                                                                                                if largestval0 - av0 >= float(relav0) + float(error0) + .5:
-                                                                                                                    largestval0 = av0 - (float(relav0) + float(error0) + .5) # sets largest val to the most valid response
+                                                                                                                global invalid_count
+                                                                                                                invalid_count = 0
+                                                                                                                def verify():
+                                                                                                                    for ref in range(19):                #||
+                                                                                                                        import json_reader                        #|| Data verification and averaging
+                                                                                                                        json_reader.readfile()                    #||
+                                                                                                                        validity_check0(json_reader.val)          #||
+                                                                                                                        if valid0 == 0:                           #||
+                                                                                                                            av0 = av0 + json_reader.val           #||
+                                                                                                                            if json_reader.val >= largestval0:     #| sets data range
+                                                                                                                                largestval0 = json_reader.val      #| sets data range
+                                                                                                                        else:
+                                                                                                                            jsonfile = 'invalid.json'  # Currently has no function
+                                                                                                                            print(ref, 'invalid')
+                                                                                                                            invalid_count = int(invalid_count) + 1
+                                                                                                                    av0 = av0 / 19
+                                                                                                                    #++++++++++++++++++++++++++++++++++++++++
+                                                                                                                    if largestval0 - av0 >= float(relav0) + float(error0) + .5:
+                                                                                                                        largestval0 = av0 - (float(relav0) + float(error0) + .5) # sets largest val to the most valid response
                                                                                                                 
+                                                                                                            #/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                                                                            #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+                                                                                                                #==============================================
+                                                                                                                #------------------ Sensor 0 ------------------
+                                                                                                                #==============================================
 
+                                                                                                                jsonfile = 'data.json'   #||
+                                                                                                                serial_comm.sensors()    #||
+                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
+                                                                                                                dat_gath_stor(serial_comm.sens0)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
+                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
+                                                                                                                verify() #| Verification
+                                                                                                                #-=-=-=-=-|
 
-
-                                                                                                                
-                                                                                                            else:
-                                                                                                                if r == 3:
-                                                                                                                    while i <= 10:
-                                                                                                                        import serial_comm
-                                                                                                                        if __name__ == "__main__":
-                                                                                                                            serial_comm.sensors()
-                                                                                                                        trigg1 = float(serial_comm.sens1) + float(trigg1)
-                                                                                                                        i = i + 1
-                                                                                                                        time.sleep(.2)
-                                                                                                                        print(trigg1)
-                                                                                                                    triggav1 = int(trigg1) / 11
-                                                                                                                    print(f"triggered sensor 1 average = {triggav1}")
-                                                                                                                    if float(triggav1) <= float(relav1) + float(error1):
-                                                                                                                        print("RESULTS INVALID")
-                                                                                                                    else:
-                                                                                                                        print("RESULTS VALID")
-
-                                                                                                            time.sleep(5)
-                                                                                                            print("==========================================================")
-                                                                                                            print("tighten the opposite arm now")
-                                                                                                            time.sleep(2)
-                                                                                                            if r == 2:
+                                                                                                                print("arm one complete!")
+                                                                                                                print("please tighten the other arm")
                                                                                                                 while r == 2:
-                                                                                                                    import serial_comm
-                                                                                                                    if __name__ == "__main__":
-                                                                                                                        serial_comm.sensors()
-                                                                                                                    if float(serial_comm.sens1) >= float(relav1) + float(error1) + .5:       # sensor 0
+                                                                                                                    if float(serial_comm.sens1) >= float(relav0) + float(error0) + 1:   # sensor 1
                                                                                                                         print("sensor 1 triggered")
-                                                                                                                        print("starting")
-                                                                                                                        r = 4
-                                                                                                                        i = 0
-                                                                                                                        while i <= 10:
-                                                                                                                            import serial_comm
-                                                                                                                            if __name__ == "__main__":
-                                                                                                                                serial_comm.sensors()
-                                                                                                                            trigg1 = float(serial_comm.sens1) + float(trigg1)
-                                                                                                                            i = i + 1
-                                                                                                                            time.sleep(.2)
-                                                                                                                        triggav1 = int(trigg1) / 11
-                                                                                                                        print(f"triggered sensor 1 average = {triggav1}")
-                                                                                                                        if float(triggav1) <= float(relav1) + float(error1):
-                                                                                                                            print("RESULTS INVALID")
-                                                                                                                        else:
-                                                                                                                            print("RESULTS VALID")
-                                                                                                            else:
-                                                                                                                while r == 3:
-                                                                                                                    import serial_comm
-                                                                                                                    if __name__ == "__main__":
-                                                                                                                        serial_comm.sensors()
-                                                                                                                    if float(serial_comm.sens0) >= float(relav0) + float(error0) + .5:       # sensor 0
-                                                                                                                        print("sensor 0 triggered")
-                                                                                                                        print("starting")
-                                                                                                                        r = 4
-                                                                                                                        i = 0
-                                                                                                                        while i <= 10:
-                                                                                                                            import serial_comm
-                                                                                                                            if __name__ == "__main__":
-                                                                                                                                serial_comm.sensors()
-                                                                                                                            trigg0 = float(serial_comm.sens0) + float(trigg0)
-                                                                                                                            i = i + 1
-                                                                                                                            time.sleep(.2)
-                                                                                                                        triggav0 = int(trigg0) / 11
-                                                                                                                        print(f"triggered sensor 0 average = {triggav0}")
-                                                                                                                        if float(triggav0) <= float(relav0) + float(error0):
-                                                                                                                            print("RESULTS INVALID")
-                                                                                                                        else:
-                                                                                                                            print("RESULTS VALID")
+                                                                                                                        r = 3
+                                                                                                                ###|||###
+                                                                                                                ###|||###
+                                                                                                                ###|||###
+                                                                                                                #==============================================
+                                                                                                                #------------------ Sensor 1 ------------------
+                                                                                                                #==============================================
 
+                                                                                                                jsonfile = 'data2.json'  #||
+                                                                                                                serial_comm.sensors()    #||
+                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
+                                                                                                                dat_gath_stor(serial_comm.sens1)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
+                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
+                                                                                                                verify() #| Verification
+                                                                                                                #-=-=-=-=-|
 
                                                                                                             print("Calibration complete!!")
+                                                                                                            time.sleep(1)
+                                                                                                            print("")
+                                                                                                            print("=======================")
+                                                                                                            print("      Results:")
+                                                                                                            print("=======================")
+                                                                                                            print("Invalid results: ", invalid_count)
+                                                                                                            print("Estimated accuracy:", ((38 - int(invalid_count))*100)/38, "%")
 
 
                                                                                 else:
