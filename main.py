@@ -506,6 +506,7 @@ while run <= 100:
                                                                                                                     if float(serial_comm.sens1) >= float(relav0) + float(error0) + 1:   # sensor 1
                                                                                                                         print("sensor 1 triggered")
                                                                                                                         r = 3
+                                                                                                                        
                                                                                                                 ###|||###
                                                                                                                 ###|||###
                                                                                                                 ###|||###
