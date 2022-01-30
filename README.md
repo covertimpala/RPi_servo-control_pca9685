@@ -1,6 +1,9 @@
 # RPi_servo-control_pca9685
 raspberry pi 180° servo control using pca9685
 
+#### WARNING: Versions 2-beta.2 and 2-beta.5 dont work correctly. (program doesn't start)
+### Please use an older version
+
 ### Requirements
 Requires you to have the [adafruit servokit library](https://circuitpython.readthedocs.io/projects/servokit/en/latest/) installed
 
