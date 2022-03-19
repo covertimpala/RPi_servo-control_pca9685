@@ -27,6 +27,10 @@ run = 0
 lock = 0
 speed = 0
 EMG = 0
+global relav0
+global relav1
+global error0
+global error1
 while run <= 100:
     key = input()
     if key == "0":
@@ -304,9 +308,8 @@ while run <= 100:
                                                                             else:
                                                                                 if key == "calibrate":
                                                                                     i = 0
-                                                                                    global relav0
-                                                                                    global relav1
-                                                                                    global error0
+                                                                                    
+                                                                                    
                                                                                     relav0 = 0
                                                                                     relav1 = 0
                                                                                     r = 0
@@ -424,7 +427,10 @@ while run <= 100:
                                                                                                                         import serial_comm                                       #||
                                                                                                                         if __name__ == "__main__":                               #||
                                                                                                                             serial_comm.sensors()                                #|| Data collection from sensor 0
-                                                                                                                        trigg0 = float(sensor) + float(trigg0)                   #|| ETA 2.2 sec
+                                                                                                                        if sensor == 0:
+                                                                                                                            trigg0 = float(serial_comm.sens0) + float(trigg0)                   #|| ETA 2.2 sec
+                                                                                                                        else:
+                                                                                                                            trigg0 = float(serial_comm.sens1) + float(trigg0)
                                                                                                                         time.sleep(.2)                                           #||
                                                                                                                         global triggav0                                          #||
                                                                                                                         triggav0 = int(trigg0) / 11   # Average                   ||
@@ -460,17 +466,24 @@ while run <= 100:
                                                                                                                         print("triggav0 VALID")                               #||
                                                                                                                         valid0 = 0                                            #||
                                                                             #====================================================================================================
-                                                                                                                largestval0 = 0
-                                                                                                                av0 = 0                                       #||
+                                                                                                                
+                                                                                                                                                       #||
                                                                                                                 #||
                                                                                                                 
                                                                                                                 # from length import file_length
-                                                                                                                global invalid_count
-                                                                                                                invalid_count = 0
+                                                                                                                
+                                                                                                                global ref
+                                                                                                                
                                                                                                                 def verify():
+                                                                                                                    global av0
+                                                                                                                    av0 = 0
+                                                                                                                    global invalid_count
+                                                                                                                    invalid_count = 0
+                                                                                                                    global largestval0
+                                                                                                                    largestval0 = 0
                                                                                                                     for ref in range(19):                #||
                                                                                                                         import json_reader                        #|| Data verification and averaging
-                                                                                                                        json_reader.readfile()                    #||
+                                                                                                                        json_reader.readfile(ref)                    #||
                                                                                                                         validity_check0(json_reader.val)          #||
                                                                                                                         if valid0 == 0:                           #||
                                                                                                                             av0 = av0 + json_reader.val           #||
@@ -479,7 +492,7 @@ while run <= 100:
                                                                                                                         else:
                                                                                                                             jsonfile = 'invalid.json'  # Currently has no function
                                                                                                                             print(ref, 'invalid')
-                                                                                                                            invalid_count = int(invalid_count) + 1
+                                                                                                                            invalid_count = invalid_count + 1
                                                                                                                     av0 = av0 / 19
                                                                                                                     #++++++++++++++++++++++++++++++++++++++++
                                                                                                                     if largestval0 - av0 >= float(relav0) + float(error0) + .5:
@@ -488,6 +501,8 @@ while run <= 100:
                                                                                                             #/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                                                                                                             #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+                                                                                                                
+
                                                                                                                 #==============================================
                                                                                                                 #------------------ Sensor 0 ------------------
                                                                                                                 #==============================================
@@ -495,7 +510,7 @@ while run <= 100:
                                                                                                                 jsonfile = 'data.json'   #||
                                                                                                                 serial_comm.sensors()    #||
                                                                                                                 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
-                                                                                                                dat_gath_stor(serial_comm.sens0)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
+                                                                                                                dat_gath_stor(0)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<> #serial_comm.sens0
                                                                                                                 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
                                                                                                                 verify() #| Verification
                                                                                                                 #-=-=-=-=-|
@@ -506,7 +521,6 @@ while run <= 100:
                                                                                                                     if float(serial_comm.sens1) >= float(relav0) + float(error0) + 1:   # sensor 1
                                                                                                                         print("sensor 1 triggered")
                                                                                                                         r = 3
-                                                                                                                        
                                                                                                                 ###|||###
                                                                                                                 ###|||###
                                                                                                                 ###|||###
@@ -517,7 +531,7 @@ while run <= 100:
                                                                                                                 jsonfile = 'data2.json'  #||
                                                                                                                 serial_comm.sensors()    #||
                                                                                                                 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
-                                                                                                                dat_gath_stor(serial_comm.sens1)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
+                                                                                                                dat_gath_stor(2)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
                                                                                                                 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
                                                                                                                 verify() #| Verification
                                                                                                                 #-=-=-=-=-|
