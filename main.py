@@ -432,8 +432,8 @@ while run <= 100:
                                                                                                                         else:
                                                                                                                             trigg0 = float(serial_comm.sens1) + float(trigg0)
                                                                                                                         time.sleep(.2)                                           #||
-                                                                                                                        global triggav0                                          #||
-                                                                                                                        triggav0 = int(trigg0) / 11   # Average                   ||
+                                                                                                                        global triggav                                          #||
+                                                                                                                        triggav = int(trigg0) / 11   # Average                   ||
                                                                                                             #-----------------------------------------------------------------------
                                                                                                                 
                                                                                                                 def dat_gath_stor(sensor):
@@ -514,6 +514,7 @@ while run <= 100:
                                                                                                                 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
                                                                                                                 verify() #| Verification
                                                                                                                 #-=-=-=-=-|
+                                                                                                                triggav0 = triggav
 
                                                                                                                 print("arm one complete!")
                                                                                                                 print("please tighten the other arm")
@@ -535,6 +536,7 @@ while run <= 100:
                                                                                                                 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
                                                                                                                 verify() #| Verification
                                                                                                                 #-=-=-=-=-|
+                                                                                                                triggav1 = triggav
 
                                                                                                             print("Calibration complete!!")
                                                                                                             time.sleep(1)
