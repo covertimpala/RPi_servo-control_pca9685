@@ -1,18 +1,51 @@
 import time
 import json
 import board
+import colorama
+from colorama import Fore
 import busio
 i2c = busio.I2C(board.SCL, board.SDA)
 from adafruit_servokit import ServoKit
-from multiprocessing import Pool
+#from multiprocessing import Pool
+import multiprocessing
 import RPi.GPIO as GPIO
 
-import adafruit_motor.servo
-import serial
+#import adafruit_motor.servo
+#import serial
+
+## Analog-digital converter setup
+#import adafruit_pcf8591.pcf8591 as PCF
+#from adafruit_pcf8591.analog_in import AnalogIn
+#from adafruit_pcf8591.analog_out import AnalogOut
+#i2c_2 = board.I2C()
+#pcf = PCF.PCF8591(i2c_2)
+
+#pcf_in_0 = AnalogIn(pcf, PCF.A0)
+#pcf_out = AnalogOut(pcf, PCF.OUT)
+
+#pcf_out.value = 65535
+#raw_value = pcf_in_0.value
+#scaled_value = (raw_value / 65535) * pcf_in_0.reference_voltage
+#print("Pin 0: %0.2fV" % (scaled_value))
+#print("")
+##
+
+#speech-to-text imports:
+import speech_recognition as sr
+global audio_sentence
 
 
-GPIO . setmode ( GPIO . BCM )
-GPIO . setup ( 18 , GPIO . OUT )
+GPIO.setmode(GPIO.BCM)
+
+GPIO_TRIGGER = 23
+GPIO_ECHO = 24
+LED = 18
+RELAY = 17
+
+GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
+GPIO.setup(GPIO_ECHO, GPIO.IN)
+GPIO . setup ( LED , GPIO . OUT )
+GPIO.setup(RELAY, GPIO.OUT)
 # Set channels to the number of servo channels on your kit.
 # 8 for FeatherWing, 16 for Shield/HAT/Bonnet.
 kit = ServoKit(channels=16)
@@ -22,7 +55,9 @@ kit.servo[1].actuation_range = 120
 kit.servo[2].actuation_range = 130
 kit.servo[3].actuation_range = 90  #still needs adjustment
 kit.servo[4].actuation_range = 180  #still needs adjustment
-kit.servo[5].actuation_range = 180   #range 90 = open 132 = closed
+kit.servo[5].actuation_range = 132   #range 90 = open 132 = closed
+global run
+global lock
 run = 0
 lock = 0
 speed = 0
@@ -30,17 +65,117 @@ EMG = 0
 global relav0
 global relav1
 global error0
-global error1
-while run <= 100:
-    key = input()
-    if key == "0":
-        print("choose angle")
-        angle = int(input())
-        kit.servo[0].angle = angle
-        
+def speech_to_text():
+    global run
+    global key
+    print(Fore.RESET)
+    #read duration from the arguments
+    r = sr.Recognizer()
+    mic = sr.Microphone()
+    global audio
+    global audio_sentence
+    i = 0
+    while i == 0:
+        print("listening")
+        with mic as source:
+            r.adjust_for_ambient_noise(source)
+            audio = r.listen(source)
+        try:
+            audio_sentence = r.recognize_google(audio)
+            print(audio_sentence)
+            if audio_sentence == "stop":
+                run = 0
+                i = 1
+                tasks("")
+            else:
+                run = 1
+                tasks(audio_sentence)
+        except Exception as ex:
+            print(ex)
+            print(Fore.RED + "audio couldnt be recognised")
+            print(Fore.RESET)
 
-    else:
-        if key == "1":
+def idle():
+    print("going to idle pos")
+    kit.servo[1].angle = 20
+    time.sleep(2)
+    kit.servo[2].angle = 5
+    time.sleep(2)
+    kit.servo[3].angle = 25
+    time.sleep(2)
+    kit.servo[0].angle = 180
+    time.sleep(2)
+    kit.servo[4].angle = 140
+    time.sleep(2)
+    kit.servo[5].angle = 95
+    print("arm has been returned to idle pos")
+
+def id_t(serv):
+    if serv == "0":
+        spdcntrl(0,200,180)
+        #kit.servo[0].angle = 180
+    elif serv == "1":
+        spdcntrl(1,200,20)
+        #kit.servo[1].angle = 20
+    elif serv == "2":
+        spdcntrl(2,200,5)
+        #kit.servo[2].angle = 5
+    elif serv == "3":
+        spdcntrl(3,200,25)
+        #kit.servo[3].angle = 25
+    elif serv == "4":
+        spdcntrl(4,200,140)
+        #kit.servo[4].angle = 140
+    elif serv == "5":
+        spdcntrl(5,200,95)
+        #kit.servo[5].angle = 95
+
+def spdcntrl(selserv, stp, an): #servo, step, angle
+    curran = round(int(kit.servo[selserv].angle))
+    an_n = (an-curran)/stp
+    for z in range(stp):
+        if z != 0:
+            #print(z, z*an/stp)
+            kit.servo[selserv].angle = curran+z*an_n
+            time.sleep(0.01)
+
+def distance():
+    GPIO.output(GPIO_TRIGGER, True)
+
+    time.sleep(0.00001)
+    GPIO.output(GPIO_TRIGGER, False)
+    StartTime = time.time()
+    StopTime = time.time()
+
+    while GPIO.input(GPIO_ECHO) == 0:
+        StartTime = time.time()
+    while GPIO.input(GPIO_ECHO) == 1:
+        StopTime = time.time()
+
+    TimeElapsed = StopTime - StartTime
+    distance = (TimeElapsed * 34300) / 2
+
+    return distance
+
+def tasks(insval):
+    global run
+    global audio_sentence
+    global key
+    global lock
+    while run <= 10:
+        if run == 0:
+            key = input()
+        else:
+            if run == 1:
+                key = insval
+        key = key.lower()
+        if key == "0":
+            print("choose angle")
+            angle = int(input())
+            kit.servo[0].angle = angle
+            
+
+        elif key == "1":
             print("choose angle")
             angle = int(input())
             
@@ -48,9 +183,13 @@ while run <= 100:
                 change_angle = int(angle) - int(round(int(kit.servo[1].angle)))
                 kit.servo[1].angle = angle
                 if int(round(int(kit.servo[2].angle) + int(change_angle))) >= 0:
-                    kit.servo[2].angle = int(round(int(kit.servo[2].angle) + int(change_angle)))
-                    print(int(change_angle))
-                    print(round(kit.servo[2].angle + change_angle))
+                    if int(round(int(kit.servo[2].angle) + int(change_angle))) <= kit.servo[2].actuation_range:
+                        kit.servo[2].angle = int(round(int(kit.servo[2].angle) + int(change_angle)))
+                        print(int(change_angle))
+                        print(round(kit.servo[2].angle + change_angle))
+                    else:
+                        kit.servo[2].angle = kit.servo[2].actuation_range
+                        print("cant engage lock")
                 else:
                     kit.servo[2].angle = 0
                     print("cant engage lock")
@@ -67,535 +206,380 @@ while run <= 100:
                 else:
                     kit.servo[1].angle = angle
 
-        else:
-            if key == "exit":
-                print("exiting")
-                exit()
+        elif key == "exit":
+            print("exiting")
+            GPIO.output(GPIO_TRIGGER, False)
+            GPIO.cleanup()
+            exit()
+
+        elif key == "idle":
+            
+            idle()
+
+
+        elif key == "2":
+            print("choose angle")
+            angle = int(input())
+            
+            if lock == 2:
+                change_angle = int(angle) - int(round(int(kit.servo[2].angle))) * -1
+                kit.servo[2].angle = angle
+                if int(round(int(kit.servo[3].angle) + int(change_angle))) >= 30:
+                    kit.servo[3].angle = int(round(int(kit.servo[3].angle) + int(change_angle)))
+                else:
+                    kit.servo[3].angle = 30
+                    print("cant engage lock")
+            else:
+                kit.servo[2].angle = angle
+                                    
+                                
+
+        elif key == "3":
+            print("choose angle")
+            angle = int(input())
+            kit.servo[3].angle = angle
+
+
+        elif key == "4":
+            print("choose angle")
+            angle = int(input())
+            kit.servo[4].angle = angle
+
+
+        elif key == "5":
+            print("choose angle")
+            angle = int(input())
+            kit.servo[5].angle = angle
+
+
+        elif key == "test":
+            print("this function is no longer available")
+
+
+        elif key == "angle":
+            print("insert servo num")
+            servo_val = int(input())
+            servo_angle = kit.servo[servo_val].angle
+            print(f"servo {servo_val} angle ≈ {round(servo_angle)}")
+
+
+        elif key == "range":
+            print("")
+            print("================================================")
+            print("=========== angle ranges for servos ============")
+            print("================================================")
+            print("")
+            print(f"servo [0] = 00° - {kit.servo[0].actuation_range}°")
+            print(f"servo [1] = 00° - {kit.servo[1].actuation_range}°")
+            print(f"servo [2] = 00° - {kit.servo[2].actuation_range}°")
+            print(f"servo [3] = 00° - {kit.servo[3].actuation_range}°")
+            print(f"servo [4] = 00° - {kit.servo[4].actuation_range}°")
+            print(f"servo [5] = 90° - {kit.servo[5].actuation_range}°")
+
+
+        elif key == "help":
+            print("")
+            print("---------------------------------------------------")
+            print("- - - - - - - - - C O M M A N D S - - - - - - - - -")
+            print("---------------------------------------------------")
+            print("")
+            print("Move servo:")
+            print("<Servo_num>")
+            print("<Angle>")
+            print("")
+            print("Return to idle pos:")
+            print("idle")
+            print("")
+            print("Get angle ranges for servos:")
+            print("range")
+            print("")
+            print("leave the program:")
+            print("exit")
+            print("")
+            print("lock servo angle:")
+            print("lock")
+            print("to unlock:")
+            print("unlock")
+            print("")
+            print("turn on/off led:")
+            print("led <on/off>")
+            print("")
+            print("activate/deactivate EMG sensors:  **(not included in this package)**")
+            print("emg <on/off>")
+            print("")
+            print("scan surroundings:")
+            print("scan")
+            print("scan for new objects:")
+            print("rescan/search")
+                    
+
+
+        elif key == "speed":
+            print("servo:")
+            servo = int(input())
+            current_angle = round(int(kit.servo[servo].angle))
+            print("angle:")
+            angle = int(input())
+            print("speed:")
+            speed = int(input())
+            speed_percent = round(speed / angle * 100)
+            print(f"speed set to {speed_percent}")
+            f = current_angle
+            if current_angle < angle:
+                while f in range(0, int(angle)):
+                    print(f)
+                    kit.servo[servo].angle = f
+                    f = int(f + int(speed_percent))
 
             else:
-                if key == "idle":
-                    print("going to idle pos")
-                    kit.servo[1].angle = 20
-                    time.sleep(2)
-                    kit.servo[2].angle = 7
-                    time.sleep(2)
-                    kit.servo[3].angle = 25
-                    time.sleep(2)
-                    kit.servo[0].angle = 180
-                    time.sleep(2)
+                print("e")
+                while f in range(int(angle), 180):
+                    print(f)
+                    kit.servo[servo].angle = f
+                    f = int(f - int(speed_percent))
+
+
+        elif key == "led on":
+            GPIO.output(18, True)
+            print("led is on")
+
+
+        elif key == "led off":
+            GPIO.output(18, False)
+            print("led is off")
+
+
+        elif key == "lock":
+            print("servo to lock (2 or 3)")
+            servo_lock = int(input())
+            if servo_lock == 2:
+                lock = 1
+
+            else:
+                if servo_lock == 3:
+                    lock = 2
+
+            print("sucess!!")
+                    
+
+
+        elif key == "unlock":
+            print("unlocking servos")
+            lock = 0
+            print("servo(s) unlocked")
+
+
+        elif key == "scan" or key == "look":
+            print("preparing scan")
+            kit.servo[0].angle = 0
+            idle()
+            kit.servo[0].angle = 180
+            print("checking systems")
+            kit.servo[4].angle = 35
+            test = round(distance())
+            print(test)
+            startt = time.time()
+            while True:
+                test = round(distance())
+                print(test)
+                if test <= 10 or test >= 3000:
+                    global total_t
+                    endt = time.time()
+                    total_t = endt - startt
+                    print("total time: ", round(total_t, 3))
+                    print("systems scan valid")
                     kit.servo[4].angle = 140
-                    time.sleep(2)
-                    kit.servo[5].angle = 130
-                    print("arm has been returned to idle pos")
-
+                    break
                 else:
-                    if key == "2":
-                        print("choose angle")
-                        angle = int(input())
+                    print("retrying")
+                    continue
+            print("preparing json")
+            open("sonicmes.json", "w").close()
+            global mes
+            mes = {}
+            with open("sonicmes.json", "r+") as sonicmes:
+                print("starting scan")
+                for p in range(8):
+                    for q in range(180):
+                        kit.servo[0].angle = 180 - q
+                        time.sleep(.01)
+                    #print(p)
+                    kit.servo[2].angle = p * 2 + 5
+                    print("starting layer", p + 1)
+                    for g in range(45):
+                        kit.servo[0].angle = g * 4
+                        time.sleep(.043) #total_t
+                        dist = distance()
+                        mes[str(p) + str(g)] = round(dist)
+                        #print(str(p) + str(g))
+                        print(round(dist))
                         
-                        if lock == 2:
-                            change_angle = int(angle) - int(round(int(kit.servo[2].angle))) * -1
-                            kit.servo[2].angle = angle
-                            if int(round(int(kit.servo[3].angle) + int(change_angle))) >= 30:
-                                kit.servo[3].angle = int(round(int(kit.servo[3].angle) + int(change_angle)))
-                            else:
-                                kit.servo[3].angle = 30
-                                print("cant engage lock")
+                print(mes)
+                sonicmes.seek(0)
+                json.dump(mes, sonicmes)
+                sonicmes.truncate
+            print("scan complete!")
+            idle()
+
+
+        elif key == "dist" or key == "distance":
+            print(round(distance()))
+
+
+        elif key == "rescan" or key == "search":
+            print("Preparing json")
+            global objects
+            objects = {}
+            open("objects.json", "w").close()
+            print("Opening json")
+            with open("sonicmes.json", "r+") as base_file:
+                base = json.load(base_file)
+                print(base["00"])
+                for th in range(8):
+                    for rt in range(180):
+                        kit.servo[0].angle = 180 -rt
+                        time.sleep(.01)
+                    kit.servo[2].angle = th * 2 + 5
+                    print("starting layer", th + 1)
+                    for yt in range(45):
+                        kit.servo[0].angle = yt * 4
+                        dist = distance()
+                        #print(base[str(th) + str(yt)])
+                        if dist <= base[str(th) + str(yt)] + 17 and dist >= base[str(th) + str(yt)] - 17:
+                            print("maching results")
                         else:
-                            kit.servo[2].angle = angle
-                                
-                            
-
-                    else:
-                        if key == "3":
-                            print("choose angle")
-                            angle = int(input())
-                            kit.servo[3].angle = angle
-
-                        else:
-                            if key == "4":
-                                print("choose angle")
-                                angle = int(input())
-                                kit.servo[4].angle = angle
-
-                            else:
-                                if key == "5":
-                                    print("choose angle")
-                                    angle = int(input())
-                                    kit.servo[5].angle = angle
-
+                            if dist < 70:
+                                if dist > base[str(th) + str(yt)] + 17:
+                                    print("object has been moved")
                                 else:
-                                    if key == "test":
-                                        print("this function is no longer available")
-
-                                    else:
-                                        if key == "angle":
-                                            print("insert servo num")
-                                            servo_val = int(input())
-                                            servo_angle = kit.servo[servo_val].angle
-                                            print(f"servo {servo_val} angle ≈ {round(servo_angle)}")
-
-                                        else:
-                                            if key == "range":
-                                                print("")
-                                                print("================================================")
-                                                print("=========== angle ranges for servos ============")
-                                                print("================================================")
-                                                print("")
-                                                print(f"servo [0] = {kit.servo[0].actuation_range}")
-                                                print(f"servo [1] = {kit.servo[1].actuation_range}")
-                                                print(f"servo [2] = {kit.servo[2].actuation_range}")
-                                                print(f"servo [3] = {kit.servo[3].actuation_range}")
-                                                print(f"servo [4] = {kit.servo[4].actuation_range}")
-                                                print(f"servo [5] = {kit.servo[5].actuation_range}")
-
-                                            else:
-                                                if key == "help":
-                                                    print("")
-                                                    print("---------------------------------------------------")
-                                                    print("- - - - - - - - - C O M M A N D S - - - - - - - - -")
-                                                    print("---------------------------------------------------")
-                                                    print("")
-                                                    print("Move servo:")
-                                                    print("<Servo_num>")
-                                                    print("<Angle>")
-                                                    print("")
-                                                    print("Return to idle pos:")
-                                                    print("idle")
-                                                    print("")
-                                                    print("Get angle ranges for servos:")
-                                                    print("range")
-                                                    print("")
-                                                    print("leave the program:")
-                                                    print("exit")
-                                                    print("")
-                                                    print("lock servo angle:")
-                                                    print("lock")
-                                                    print("to unlock:")
-                                                    print("unlock")
-                                                    print("")
-                                                    print("activate/deactivate EMG sensors:")
-                                                    print("emg <on/off>")
-                                                    
-
-                                                else:
-                                                    if key == "speed":
-                                                        print("servo:")
-                                                        servo = int(input())
-                                                        current_angle = round(int(kit.servo[servo].angle))
-                                                        print("angle:")
-                                                        angle = int(input())
-                                                        print("speed:")
-                                                        speed = int(input())
-                                                        speed_percent = round(speed / angle * 100)
-                                                        print(f"speed set to {speed_percent}")
-                                                        f = current_angle
-                                                        if current_angle < angle:
-                                                            while f in range(0, int(angle)):
-                                                                print(f)
-                                                                kit.servo[servo].angle = f
-                                                                f = int(f + int(speed_percent))
-
-                                                        else:
-                                                            print("e")
-                                                            while f in range(int(angle), 180):
-                                                                print(f)
-                                                                kit.servo[servo].angle = f
-                                                                f = int(f - int(speed_percent))
-
-                                                    else:
-                                                        if key == "led on":
-                                                            GPIO.output(18, True)
-                                                            print("led is on")
-
-                                                        else:
-                                                            if key == "led off":
-                                                                GPIO.output(18, False)
-                                                                print("led is off")
-
-                                                            else:
-                                                                if key == "lock":
-                                                                    print("servo to lock (2 or 3)")
-                                                                    servo_lock = int(input())
-                                                                    if servo_lock == 2:
-                                                                        lock = 1
-
-                                                                    else:
-                                                                        if servo_lock == 3:
-                                                                            lock = 2
-
-                                                                    print("sucess!!")
-                                                                    
-
-                                                                else:
-                                                                    if key == "unlock":
-                                                                        print("unlocking servos")
-                                                                        lock = 0
-                                                                        print("servo(s) unlocked")
+                                    print("new object detected")
+                                    objects[str(th), str(yt * 4)] = dist
+                            else:
+                                print("result out of range")
+                        time.sleep(.043)
+            
+            idle()
+            print("processing objects")
+            objectangles = {}
+            
+            for lev in range(8):
+                print("starting level", lev)
+                for ang in range(180):
+                    try:
+                        print(ang,":" ,objects[str(lev), str(ang)])
+                        try:
+                            objectangles[ang] = objectangles[ang] + 1
+                        except:
+                            objectangles[ang] = 1
+                    except:
+                        continue
+            global objectstreak
+            global objectss
+            global acob
+            objectstreak = {}
+            objectss = {}
+            acob = {}
+            for tanfdg in range(45):
+                try:
+                    print(tanfdg * 4,":" ,objectangles[tanfdg * 4])
+                    if objectangles[tanfdg * 4] >= 2:
+                            if prev == "yes":
+                                objectstreak[len(objectstreak)] = objectstreak[len(objectstreak)] + 1
+                            else:
+                                objectstreak[len(objectstreak) + 1] = 1
+                                prev = "yes"
+                                objectss[len(objectstreak)] = tanfdg * 4
+                    else:
+                        prev = "no"
+                except:
+                    prev  = "no"
+                    continue
+            print(objectstreak)
+            print(objectss)
+            for fer in range(len(objectstreak)):
+                if objectstreak[fer + 1] >= 3:
+                    acob[len(acob) + 1] = fer + 1
 
 
-                                                                    else:
-                                                                        if key == "emg on":
-                                                                            EMG = 1
-                                                                            print("activating code")
-                                                                            emgservo = 0
-                                                                            status1 = "0"
-                                                                            time.sleep(2)
-                                                                            statsense = 0
-                                                                            print("EMG ACTIVE")
-                                                                            while EMG == 1:
-                                                                                
-                                                                                import serial_comm
-                                                                                
-                                                                                if __name__ == "__main__":
-                                                                                    serial_comm.sensors()
-                                                                                    ####
-                                                                                    if float(serial_comm.sens1) <= float(relav1) + float(error1):
-                                                                                        status1 = "IDLE"
-                                                                                    else:
-                                                                                        status1 = "ACTIVE"
-                                                                                        ####
-                                                                                    if float(serial_comm.sens0) <= float(relav0) + float(error0)+.5:
-                                                                                        status0 = "IDLE"
-                                                                                        statsense = 0
-                                                                                    else:
-                                                                                        status0 = "ACTIVE"
-                                                                                        if status1 == "ACTIVE":
-                                                                                            print("h")
-                                                                                            if emgservo <= 4:
-                                                                                                if statsense == 0:
-                                                                                                    statsense = 1
-                                                                                                    emgservo = emgservo + 1
-                                                                                                    print(emgservo)
-                                                                                            else:
-                                                                                                if statsense == 0:
-                                                                                                    statsense = 0
-                                                                                                    emgservo = 0
-                                                                                                    print(emgservo)
-                                                                                    
-                                                                                            
-
-                                                                                    if float(serial_comm.sens1) <= float(relav1) + float(error1):
-                                                                                        status1 = "IDLE"
-                                                                                    else:
-                                                                                        status1 = "ACTIVE"
-                                                                                    
-                                                                                    if status1 == "IDLE":
-                                                                                        if int(float(serial_comm.sens0)) >= float(triggav0) + float(error0):
-                                                                                            current_angle = round(int(kit.servo[emgservo].angle))
-                                                                                            if kit.servo[emgservo].actuation_range >= int(current_angle + 5):
-                                                                                                kit.servo[emgservo].angle = int(current_angle + 4)
-                                                                                            else:
-                                                                                                print("maxangle reached")
-
-                                                                                    if status0 == "IDLE":
-                                                                                        if int(float(serial_comm.sens1)) >= float(triggav1) + float(error1):
-                                                                                            current_angle = round(int(kit.servo[emgservo].angle))
-                                                                                            if current_angle >= 6:
-                                                                                                kit.servo[emgservo].angle = int(current_angle - 5)
-                                                                                            
-                                                                                
-                                                                                
+        elif key == "text to speech" or key == "mic on":
+            run = 1
+            speech_to_text()
 
 
-                                                                        else:
-                                                                            if key == "emg off":
-                                                                                EMG = 0
-                                                                                print("sensors deactivated")
+        elif key == "power on":
+            GPIO.output(RELAY, GPIO.HIGH)
+            print("relay on")
 
 
+        elif key == "power off":
+            GPIO.output(RELAY, GPIO.LOW)
+            print("relay off")
+                        
 
-                                                                            else:
-                                                                                if key == "calibrate":
-                                                                                    i = 0
-                                                                                    
-                                                                                    
-                                                                                    relav0 = 0
-                                                                                    relav1 = 0
-                                                                                    r = 0
-                                                                                    import serial_comm
-                                                                                    if __name__ == "__main__":
-                                                                                        serial_comm.sensors()
-                                                                                        print("calibration will now begin")
-                                                                                        print("relax both muscles (sensors should glow green)")
-                                                                                        while r == 0:
-                                                                                            import serial_comm
-                                                                                            if __name__ == "__main__":
-                                                                                                serial_comm.sensors()
-                                                                                            if int(float(serial_comm.sens0)) <= 1.3:
-                                                                                                if int(float(serial_comm.sens1)) <= 1.3:
-                                                                                                    r = 1
-                                                                                                    print("starting in 5 sec")
-                                                                                                    time.sleep(1)
-                                                                                                    print("4")
-                                                                                                    time.sleep(1)
-                                                                                                    print("3")
-                                                                                                    time.sleep(1)
-                                                                                                    print("2")
-                                                                                                    time.sleep(1)
-                                                                                                    print("1")
-                                                                                                    time.sleep(1)
-                                                                                                    print("starting")
-                                                                                                    large0 = 0
-                                                                                                    large1 = 0
-                                                                                                    while i <= 10:             # idle calibration
-                                                                                                        import serial_comm
-                                                                                                        if __name__ == "__main__":
-                                                                                                            serial_comm.sensors()
-                                                                                                        rel0 = float(serial_comm.sens0) + float(relav0)
-                                                                                                        relav0 = float(rel0)
-                                                                                                        rel1 = float(serial_comm.sens1) + float(relav1)
-                                                                                                        relav1 = float(rel1)
-                                                                                                        i = i + 1
-                                                                                                        if float(serial_comm.sens0) >= float(large0):
-                                                                                                            large0 = float(serial_comm.sens0)
-                                                                                                        if float(serial_comm.sens1) >= float(large1):
-                                                                                                            large1 = float(serial_comm.sens1)
-                                                                                                        time.sleep(.2)
-                                                                                                        print((serial_comm.sens0))
-                                                                                                        print(relav0)
-                                                                                                    print(relav0)
-                                                                                                    relav0 = int(relav0) / 11
-                                                                                                    relav1 = int(relav1) / 11
-                                                                                                    print(f"relax0 = {relav0}")
-                                                                                                    print(f"relax1 = {relav1}")
-                                                                                                    print("error range:")
-                                                                                                    error0 = float(large0) - float(relav0)   # data range sensor 0
-                                                                                                    error1 = float(large1) - float(relav1)   # data range sensor 1
-                                                                                                    print(f"0: {error0}")
-                                                                                                    print(f"1: {error1}")
-                                                                                                    if float(error0) >= 1:
-                                                                                                        print("CALIBRATION RESULT ERROR RANGE TOO LARGE")
-                                                                                                    else:
-                                                                                                        if float(error1) >= 1:
-                                                                                                            print("CALIBRATION RESULT ERROR RANGE TOO LARGE")
-                                                                                                        else:
-                                                                                                            print("RESULTS VALID")
-                                                                                                            time.sleep(2)
-                                                                                                            print("==========================================================")
-                                                                                                            print("Tighten sensor 0")
-                                                                                                            while r == 1:
-                                                                                                                import serial_comm
-                                                                                                                if __name__ == "__main__":
-                                                                                                                    serial_comm.sensors()
-                                                                                                                if float(serial_comm.sens0) >= float(relav0) + float(error0) + 1:       # sensor 0
-                                                                                                                    print("sensor 0 triggered")
-                                                                                                                    r = 2
+        elif "object" in key:
+            print("calculating objects")
+            global ob
+            ob = key[len(key)-1]
+            try:
+                int(ob)
+                print("calculating")
+                print("object location: ", objectss[acob[int(ob)]], "to", (((objectstreak[acob[int(ob)]] - 1)*4) + objectss[acob[int(ob)]]))
+                print("aiming at object")
+                kit.servo[0].angle = (((objectstreak[acob[int(ob)]] - 1)*4) + objectss[acob[int(ob)]] + objectss[acob[int(ob)]])/2
+                print("objects approx width")
+                
+                
+            except Exception as exexe:
+                print("object not specified or search/rescan not complete")
+                print("error: ", exexe)
+                print("do you want to see available objects?  y/n")
+                query = input()
+                if query == "y" or query == "yes":
+                    try:
+                        objectss
+                        print("available objects are: ", acob)
+                        print("reference: <object label>: <program ref>")
+                    except:
+                        print("search/rescan must be done before this feature can be used")
+
+        elif "idle_t" in key:
+            #id_t("0")
+            p0 = multiprocessing.Process(target=spdcntrl,args=[0,200,180])
+            p1 = multiprocessing.Process(target=spdcntrl,args=[1,200,20])
+            p2 = multiprocessing.Process(target=spdcntrl,args=[2,200,5])
+            p3 = multiprocessing.Process(target=spdcntrl,args=[3,200,25])
+            p4 = multiprocessing.Process(target=spdcntrl,args=[4,200,140])
+            p5 = multiprocessing.Process(target=spdcntrl,args=[5,200,95])
+            if __name__ == '__main__':
+                p0.start()
+                p1.start()
+                p2.start()
+                p3.start()
+                p4.start()
+                p5.start()
+            print("done")
+        
+        elif "speed_t" in key:
+            print("servo num?")
+            selserv = int(input())
+            print("steps")
+            stp = int(input())
+            print("angle")
+            an = int(input())
+            curran = round(int(kit.servo[selserv].angle))
+            an_n = (an-curran)/stp
+            for z in range(stp):
+                if z != 0:
+                    #print(z, z*an/stp)
+                    kit.servo[selserv].angle = curran+z*an_n
+                    time.sleep(0.01)
+            print("done")
+
+        else:
+            print("unrecognised command")
+
+        if run == 1:
+            run = 20
 
 
-                                                                                                            print("starting in 5 sec")
-                                                                                                            time.sleep(1)
-                                                                                                            print("4")
-                                                                                                            time.sleep(1)
-                                                                                                            print("3")
-                                                                                                            time.sleep(1)
-                                                                                                            print("2")
-                                                                                                            time.sleep(1)
-                                                                                                            print("1")
-                                                                                                            time.sleep(1)
-                                                                                                            print("starting")
-
-                                                                                                            i = 0
-                                                                                                            trigg0 = 0
-                                                                                                            trigg1 = 1
-                                                                                                            global jsonfile
-                                                                                                            jsonfile = "data.json"
-                                                                                                            if r == 2:
-
-
-                                                                                                                # /-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\ STAGE 1 /-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
-
-                                                                                                                ########################################################################## ENCODING START
-
-
-                                                                                                                def data0(level, value):
-                                                                                                                    with open(jsonfile, 'r+') as f:  # open(data.json, 'r+')
-                                                                                                                        global data
-                                                                                                                        data = json.load(f)
-                                                                                                                        data[level] = value # <--- data[ref] = measurements
-                                                                                                                        f.seek(0)        # <--- resets file position to the beginning
-                                                                                                                        json.dump(data, f, indent=4)
-                                                                                                                        f.truncate()
-                                                                                                                
-                                                                                                                
-                                                                                                                ########################################################################## ENCODING END
-
-
-                                                                                                                def trigger0(sensor):                                            #||
-                                                                                                                    trigg0 = 0                                                   #||
-                                                                                                                    for i in range(10):                                          #||
-                                                                                                                        import serial_comm                                       #||
-                                                                                                                        if __name__ == "__main__":                               #||
-                                                                                                                            serial_comm.sensors()                                #|| Data collection from sensor 0
-                                                                                                                        if sensor == 0:
-                                                                                                                            trigg0 = float(serial_comm.sens0) + float(trigg0)                   #|| ETA 2.2 sec
-                                                                                                                        else:
-                                                                                                                            trigg0 = float(serial_comm.sens1) + float(trigg0)
-                                                                                                                        time.sleep(.2)                                           #||
-                                                                                                                        global triggav                                          #||
-                                                                                                                        triggav = int(trigg0) / 11   # Average                   ||
-                                                                                                            #-----------------------------------------------------------------------
-                                                                                                                
-                                                                                                                def dat_gath_stor(sensor):
-                                                                                                                    lev = 0                           #||
-                                                                                                                    for q in range(19):               #||
-                                                                                                                        print(lev,':')                #||
-                                                                                                                        trigger0(sensor)              #|| Data storage
-                                                                                                                        data0(lev, triggav0)          #|| ETA 41.8 sec
-                                                                                                                        print(triggav0)               #||
-                                                                                                                        lev = lev+1                   #||
-                                                                                                                    #----------------------------------------
-                                                                                                                    data0('end', 'value') # Prevents duplicates  |Completion
-                                                                                                                    print(f"data stored in file: {jsonfile}")#    |
-                                                                                                                    #--------------------------------------------------------------------
-
-
-
-
-
-
-                                                                                                                #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\ Stage 2 /-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
-
-                                                                                                                def validity_check0(variable):                                #||
-                                                                                                                    global valid0                                             #||
-                                                                                                                    if float(variable) <= float(relav0) + float(error0) + .5: #||
-                                                                                                                        print(f"{variable} INVALID")                          #||
-                                                                                                                        print(f"terminating {variable}")                      #|| Validity check sens0
-                                                                                                                        valid0 = 1                                            #||
-                                                                                                                    else:                                                     #||
-                                                                                                                        print("triggav0 VALID")                               #||
-                                                                                                                        valid0 = 0                                            #||
-                                                                            #====================================================================================================
-                                                                                                                
-                                                                                                                                                       #||
-                                                                                                                #||
-                                                                                                                
-                                                                                                                # from length import file_length
-                                                                                                                
-                                                                                                                global ref
-                                                                                                                
-                                                                                                                def verify():
-                                                                                                                    global av0
-                                                                                                                    av0 = 0
-                                                                                                                    global invalid_count
-                                                                                                                    invalid_count = 0
-                                                                                                                    global largestval0
-                                                                                                                    largestval0 = 0
-                                                                                                                    for ref in range(19):                #||
-                                                                                                                        import json_reader                        #|| Data verification and averaging
-                                                                                                                        json_reader.readfile(ref)                    #||
-                                                                                                                        validity_check0(json_reader.val)          #||
-                                                                                                                        if valid0 == 0:                           #||
-                                                                                                                            av0 = av0 + json_reader.val           #||
-                                                                                                                            if json_reader.val >= largestval0:     #| sets data range
-                                                                                                                                largestval0 = json_reader.val      #| sets data range
-                                                                                                                        else:
-                                                                                                                            jsonfile = 'invalid.json'  # Currently has no function
-                                                                                                                            print(ref, 'invalid')
-                                                                                                                            invalid_count = invalid_count + 1
-                                                                                                                    av0 = av0 / 19
-                                                                                                                    #++++++++++++++++++++++++++++++++++++++++
-                                                                                                                    if largestval0 - av0 >= float(relav0) + float(error0) + .5:
-                                                                                                                        largestval0 = av0 - (float(relav0) + float(error0) + .5) # sets largest val to the most valid response
-                                                                                                                
-                                                                                                            #/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                                                                                            #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-                                                                                                                
-
-                                                                                                                #==============================================
-                                                                                                                #------------------ Sensor 0 ------------------
-                                                                                                                #==============================================
-
-                                                                                                                jsonfile = 'data.json'   #||
-                                                                                                                serial_comm.sensors()    #||
-                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
-                                                                                                                dat_gath_stor(0)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<> #serial_comm.sens0
-                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
-                                                                                                                verify() #| Verification
-                                                                                                                #-=-=-=-=-|
-                                                                                                                triggav0 = triggav
-
-                                                                                                                print("arm one complete!")
-                                                                                                                print("please tighten the other arm")
-                                                                                                                while r == 2:
-                                                                                                                    if float(serial_comm.sens1) >= float(relav0) + float(error0) + 1:   # sensor 1
-                                                                                                                        print("sensor 1 triggered")
-                                                                                                                        r = 3
-                                                                                                                ###|||###
-                                                                                                                ###|||###
-                                                                                                                ###|||###
-                                                                                                                #==============================================
-                                                                                                                #------------------ Sensor 1 ------------------
-                                                                                                                #==============================================
-
-                                                                                                                jsonfile = 'data2.json'  #||
-                                                                                                                serial_comm.sensors()    #||
-                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
-                                                                                                                dat_gath_stor(2)      #sensor development               |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<<>
-                                                                                                                #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=<><>
-                                                                                                                verify() #| Verification
-                                                                                                                #-=-=-=-=-|
-                                                                                                                triggav1 = triggav
-
-                                                                                                            print("Calibration complete!!")
-                                                                                                            time.sleep(1)
-                                                                                                            print("")
-                                                                                                            print("=======================")
-                                                                                                            print("      Results:")
-                                                                                                            print("=======================")
-                                                                                                            print("Invalid results: ", invalid_count)
-                                                                                                            print("Estimated accuracy:", ((38 - int(invalid_count))*100)/38, "%")
-
-
-                                                                                else:
-                                                                                    if key == "serial speed":
-                                                                                        print("speed options:")
-                                                                                        print("within range 0 - 200 (BETA) (UNAVAILABLE)")
-                                                                                        print("or AUTO (BETA) (UNAVAILABLE)")
-                                                                                        ardspeed = input()
-
-                                                                                        if ardspeed == "AUTO" or "auto":
-                                                                                            print("starting RPi to Arduino 2 way collaboration")
-                                                                                            if __name__ == '__main__':
-                                                                                                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-                                                                                                ser.reset_input_buffer()
-                                                                                                while True:
-                                                                                                    ser.write(b"auto\n")
-                                                                                                    line = ser.readline().decode('utf-8').rstrip()
-                                                                                                    print(line)
-                                                                                                    time.sleep(1)
-                                                                                        else:
-                                                                                            print("starting RPi to Arduino 2 way collaboration")
-                                                                                            if __name__ == '__main__':
-                                                                                                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-                                                                                                ser.reset_input_buffer()
-                                                                                                while True:
-                                                                                                    ser.write(f"{ardspeed}\n")
-                                                                                                    line = ser.readline().decode('utf-8').rstrip()
-                                                                                                    print(line)
-                                                                                                    time.sleep(1)
-
-
-
-                                                                                    else:
-                                                                                        if key == "measurements":
-                                                                                            for w in range(50):
-                                                                                                import serial_comm
-                                                                                                if __name__ == "__main__":
-                                                                                                    serial_comm.sensors()
-                                                                                                print(serial_comm.sens0)
-                                                                                                print(serial_comm.sens1)
-                                                                                                time.sleep(.1)
-
-
-
-
-
-
-                                                                                                            
-                                            
-                                        
-
-time.sleep(1)
-
+tasks("")
