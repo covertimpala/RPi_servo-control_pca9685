@@ -5,10 +5,17 @@ import colorama
 from colorama import Fore
 import busio
 i2c = busio.I2C(board.SCL, board.SDA)
+import math
 from adafruit_servokit import ServoKit
 #from multiprocessing import Pool
 import multiprocessing
 import RPi.GPIO as GPIO
+
+try:
+    from colorama import Fore
+    nocolor = 0
+except Exception:
+    nocolor = 1
 
 #import adafruit_motor.servo
 #import serial
@@ -58,6 +65,9 @@ kit.servo[4].actuation_range = 180  #still needs adjustment
 kit.servo[5].actuation_range = 132   #range 90 = open 132 = closed
 global run
 global lock
+r1 = 5
+r2 = 5
+r3 = 5
 run = 0
 lock = 0
 speed = 0
@@ -138,6 +148,58 @@ def spdcntrl(selserv, stp, an): #servo, step, angle
             #print(z, z*an/stp)
             kit.servo[selserv].angle = curran+z*an_n
             time.sleep(0.01)
+
+#========================================================================================================================#
+################################################### Inverse Kinematics ###################################################
+#========================================================================================================================#
+
+def calculateab(locx, locy, o, r1, r2, r3, _range, bypass, x_dist, y_dist):
+    b = math.acos((locx**2 + locy**2 - r1**2 - r2**2) / (r1**2+r2**2))#(r1**2+r2**2)            (2*r1*r2)
+    #print("b:", b)
+    bt = math.degrees(b)
+    if bt >= _range[0]*bypass and bt <=_range[1]*bypass:
+        a = math.atan(locx/locy)-math.atan((r2*math.sin(b))/(r1+(r2*math.cos(b))))
+        #print("a:", a)
+        at = math.degrees(a)
+        if at >= _range[0]*bypass and at <=_range[1]*bypass:
+            ys = (((locy-r1*math.cos(a))/(locx-r1*math.sin(a)))*(x_dist-r1*math.sin(a))+r1*math.cos(a)) #equation of the line from r2
+            ds = math.sqrt((x_dist-locx)**2 + (ys-locy)**2) #side 1
+            ds3 = abs(ys-y_dist) #side 3
+            c = math.degrees(math.acos((ds**2+r3**2-ds3**2)/(2*ds*r3))) #Cosine rule
+            if x_dist < locx:
+                cp = c-180
+                if cp >= _range[0]*bypass and cp <= _range[1]*bypass:
+                    if nocolor == 0:
+                        print(Fore.RED + "Additional", o) #Uncertain has been updated to "Additional"
+                        print(Fore.RESET + "",at,bt,c, "or", cp)
+                    else:
+                        print("Additional", o)
+                        print(at,bt,cp)
+            elif c >= _range[0] and c <=_range[1]:
+                if nocolor == 0:
+                    print(Fore.GREEN + "Point on circle (angle degrees):", o, "location:", locx, locy)
+                    print(Fore.RESET + "Degrees:",at,bt,c)
+                else:
+                    print("Point on circle (angle degrees):", o, "location:", locx, locy)
+                    print("Degrees:",at,bt,c)
+
+def choosepos(segment1, segment2, segment3, x_dist, y_dist, step, _range, bypass):
+    #angle = random.randrange(0,359,1)
+    for i in range(359*step):
+        x_p = r3*math.cos(math.radians(i/step))#r3*math.cos(math.radians(i))
+        y_p = r3*math.sin(math.radians(i/step))#r3*math.sin(math.radians(i))
+        joint3loc = [x_dist+x_p, y_dist+y_p]
+        #print(joint3loc)
+        try:
+            calculateab(joint3loc[0], joint3loc[1],i/step, segment1, segment2, segment3, _range, bypass, x_dist, y_dist)
+        except Exception as f:
+            #print(f)
+            #print(Fore.RED + "OUT OF RANGE", i/step, joint3loc[0], joint3loc[1])
+            continue
+
+#========================================================================================================================#
+################################################# Inverse Kinematics END #################################################
+#========================================================================================================================#
 
 def distance():
     GPIO.output(GPIO_TRIGGER, True)
