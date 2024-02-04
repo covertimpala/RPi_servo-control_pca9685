@@ -1,7 +1,7 @@
 import time
 import json
 import board
-import colorama
+#import colorama
 from colorama import Fore
 import busio
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -59,7 +59,7 @@ kit = ServoKit(channels=16)
 kit.servo.frequency = 50
 kit.servo[0].actuation_range = 180
 kit.servo[1].actuation_range = 120
-kit.servo[2].actuation_range = 130
+kit.servo[2].actuation_range = 130 #adjust
 kit.servo[3].actuation_range = 90  #still needs adjustment
 kit.servo[4].actuation_range = 180  #still needs adjustment
 kit.servo[5].actuation_range = 132   #range 90 = open 132 = closed
@@ -71,6 +71,8 @@ r3 = 5
 run = 0
 lock = 0
 speed = 0
+bypass = 1
+_range = [-90, 90, -90, 90, -90, 90]
 EMG = 0
 global relav0
 global relav1
@@ -157,7 +159,7 @@ def calculateab(locx, locy, o, r1, r2, r3, _range, bypass, x_dist, y_dist):
     b = math.acos((locx**2 + locy**2 - r1**2 - r2**2) / (r1**2+r2**2))#(r1**2+r2**2)            (2*r1*r2)
     #print("b:", b)
     bt = math.degrees(b)
-    if bt >= _range[0]*bypass and bt <=_range[1]*bypass:
+    if bt >= _range[2]*bypass and bt <=_range[3]*bypass:
         a = math.atan(locx/locy)-math.atan((r2*math.sin(b))/(r1+(r2*math.cos(b))))
         #print("a:", a)
         at = math.degrees(a)
@@ -168,34 +170,47 @@ def calculateab(locx, locy, o, r1, r2, r3, _range, bypass, x_dist, y_dist):
             c = math.degrees(math.acos((ds**2+r3**2-ds3**2)/(2*ds*r3))) #Cosine rule
             if x_dist < locx:
                 cp = c-180
-                if cp >= _range[0]*bypass and cp <= _range[1]*bypass:
+                if cp >= _range[4]*bypass and cp <= _range[5]*bypass:
                     if nocolor == 0:
                         print(Fore.RED + "Additional", o) #Uncertain has been updated to "Additional"
                         print(Fore.RESET + "",at,bt,c, "or", cp)
+                        return [at, bt, c, "a"]
                     else:
                         print("Additional", o)
                         print(at,bt,cp)
-            elif c >= _range[0] and c <=_range[1]:
+                        return [at, bt, c, "a"]
+                else:
+                    print(Fore.RED + "angle out of range" + Fore.RESET)
+                    return ("out of range")
+            elif c >= _range[4] and c <=_range[5]:
                 if nocolor == 0:
                     print(Fore.GREEN + "Point on circle (angle degrees):", o, "location:", locx, locy)
                     print(Fore.RESET + "Degrees:",at,bt,c)
+                    return [at, bt, c, ""]
                 else:
                     print("Point on circle (angle degrees):", o, "location:", locx, locy)
                     print("Degrees:",at,bt,c)
+                    return [at, bt, c, ""]
+        else:
+            print(Fore.RED + "angle out of range" + Fore.RESET)
+            return ("out of range")
+    else:
+        print(Fore.RED + "angle out of range" + Fore.RESET)
+        #print()
+        return ("out of range")
 
-def choosepos(segment1, segment2, segment3, x_dist, y_dist, step, _range, bypass):
-    #angle = random.randrange(0,359,1)
-    for i in range(359*step):
-        x_p = r3*math.cos(math.radians(i/step))#r3*math.cos(math.radians(i))
-        y_p = r3*math.sin(math.radians(i/step))#r3*math.sin(math.radians(i))
-        joint3loc = [x_dist+x_p, y_dist+y_p]
-        #print(joint3loc)
-        try:
-            calculateab(joint3loc[0], joint3loc[1],i/step, segment1, segment2, segment3, _range, bypass, x_dist, y_dist)
-        except Exception as f:
-            #print(f)
-            #print(Fore.RED + "OUT OF RANGE", i/step, joint3loc[0], joint3loc[1])
-            continue
+def choosepos(segment1, segment2, segment3, x_dist, y_dist, step, _range, bypass, offstx_, offsty_, simpl, z):
+    if simpl == False:
+        x_p = x_dist+offstx_
+        y_p = y_dist+offsty_
+    else:
+        x_p = r3*math.cos(math.radians(z/step))#r3*math.cos(math.radians(i))
+        y_p = r3*math.sin(math.radians(z/step))#r3*math.sin(math.radians(i))
+    joint3loc = [x_p, y_p]
+    try:
+        return(calculateab(joint3loc[0], joint3loc[1],"", segment1, segment2, segment3, _range, bypass, x_dist, y_dist))
+    except Exception as f:
+        print("failed:", f)
 
 #========================================================================================================================#
 ################################################# Inverse Kinematics END #################################################
@@ -374,31 +389,6 @@ def tasks(insval):
             print("scan for new objects:")
             print("rescan/search")
                     
-
-
-        elif key == "speed":
-            print("servo:")
-            servo = int(input())
-            current_angle = round(int(kit.servo[servo].angle))
-            print("angle:")
-            angle = int(input())
-            print("speed:")
-            speed = int(input())
-            speed_percent = round(speed / angle * 100)
-            print(f"speed set to {speed_percent}")
-            f = current_angle
-            if current_angle < angle:
-                while f in range(0, int(angle)):
-                    print(f)
-                    kit.servo[servo].angle = f
-                    f = int(f + int(speed_percent))
-
-            else:
-                print("e")
-                while f in range(int(angle), 180):
-                    print(f)
-                    kit.servo[servo].angle = f
-                    f = int(f - int(speed_percent))
 
 
         elif key == "led on":
@@ -621,7 +611,7 @@ def tasks(insval):
                 p5.start()
             print("done")
         
-        elif "speed_t" in key:
+        elif "speed" in key:
             print("servo num?")
             selserv = int(input())
             print("steps")
