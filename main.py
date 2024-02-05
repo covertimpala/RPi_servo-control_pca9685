@@ -348,7 +348,7 @@ def tasks(insval):
             print("")
             print(f"servo [0] = 00° - {kit.servo[0].actuation_range}°")
             print(f"servo [1] = 00° - {kit.servo[1].actuation_range}°")
-            print(f"servo [2] = 00° - {kit.servo[2].actuation_range}°")
+            print(f"servo [2] = 00° - {kit.servo[2].actuation_range}°") #update
             print(f"servo [3] = 00° - {kit.servo[3].actuation_range}°")
             print(f"servo [4] = 00° - {kit.servo[4].actuation_range}°")
             print(f"servo [5] = 90° - {kit.servo[5].actuation_range}°")
