@@ -431,11 +431,11 @@ def tasks(insval):
             kit.servo[0].angle = 180
             print("checking systems")
             kit.servo[4].angle = 35
-            test = round(distance())
+            test = round(distance(),2) ###########
             print(test)
             startt = time.time()
             while True:
-                test = round(distance())
+                test = round(distance(),2) ###########
                 print(test)
                 if test <= 10 or test >= 3000:
                     global total_t
@@ -465,7 +465,7 @@ def tasks(insval):
                         kit.servo[0].angle = g * 4
                         time.sleep(.043) #total_t
                         dist = distance()
-                        mes[str(p) + str(g)] = round(dist)
+                        mes[str(p) + str(g)] = round(dist,2)
                         #print(str(p) + str(g))
                         print(round(dist))
                         
@@ -478,7 +478,7 @@ def tasks(insval):
 
 
         elif key == "dist" or key == "distance":
-            print(round(distance()))
+            print(round(distance(),2))
 
 
         elif key == "rescan" or key == "search":
