@@ -424,7 +424,7 @@ def tasks(insval):
             print("servo(s) unlocked")
 
 
-        elif key == "scan" or key == "look":
+        elif key == "scan" or key == "look": ####################################
             print("preparing scan")
             kit.servo[0].angle = 0
             idle()
@@ -467,7 +467,7 @@ def tasks(insval):
                         dist = distance()
                         mes[str(p) + str(g)] = round(dist,2)
                         #print(str(p) + str(g))
-                        print(round(dist))
+                        print(round(dist),2)
                         
                 print(mes)
                 sonicmes.seek(0)
