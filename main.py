@@ -232,7 +232,7 @@ def choosepos(segment1, segment2, segment3, x_dist, y_dist, step, _range, bypass
 #========================================================================================================================#
 ################################################# Inverse Kinematics END #################################################
 #========================================================================================================================#
-
+    
 def distance():
     GPIO.output(GPIO_TRIGGER, True)
 
@@ -243,8 +243,16 @@ def distance():
 
     while GPIO.input(GPIO_ECHO) == 0:
         StartTime = time.time()
-    while GPIO.input(GPIO_ECHO) == 1:
-        StopTime = time.time()
+    #while GPIO.input(GPIO_ECHO) == 1:
+    while True:
+        if GPIO.input(GPIO_ECHO) == 1:
+            StopTime = time.time()
+            break
+        else:
+            if time.time() - StartTime > 1:
+                StopTime = StartTime + 1
+                break
+            
 
     TimeElapsed = StopTime - StartTime
     distance = (TimeElapsed * 34300) / 2
