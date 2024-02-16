@@ -109,19 +109,33 @@ def speech_to_text():
             print(Fore.RESET)
 
 def idle():
-    print("going to idle pos")
-    kit.servo[1].angle = 20
-    time.sleep(2)
-    kit.servo[2].angle = 5
-    time.sleep(2)
-    kit.servo[3].angle = 25
-    time.sleep(2)
-    kit.servo[0].angle = 180
-    time.sleep(2)
-    kit.servo[4].angle = 140
-    time.sleep(2)
-    kit.servo[5].angle = 95
-    print("arm has been returned to idle pos")
+    sp0 = multiprocessing.Process(target=spdcntrl,args=[0,200,180])
+    sp1 = multiprocessing.Process(target=spdcntrl,args=[1,200,20])
+    sp2 = multiprocessing.Process(target=spdcntrl,args=[2,200,0])
+    sp3 = multiprocessing.Process(target=spdcntrl,args=[3,200,15])
+    sp4 = multiprocessing.Process(target=spdcntrl,args=[4,200,140])
+    sp5 = multiprocessing.Process(target=spdcntrl,args=[5,200,95])
+    if __name__ == '__main__':
+        sp0.start()
+        sp1.start()
+        sp2.start()
+        sp3.start()
+        sp4.start()
+        sp5.start()
+    print("done")
+ #   print("going to idle pos")
+  #  kit.servo[1].angle = 20
+   # time.sleep(2)
+    #kit.servo[2].angle = 0
+    #time.sleep(2)
+    #kit.servo[3].angle = 15
+    #time.sleep(2)
+    #kit.servo[0].angle = 180
+    #time.sleep(2)
+    #kit.servo[4].angle = 140
+    #time.sleep(2)
+    #kit.servo[5].angle = 95
+    #print("arm has been returned to idle pos")
 
 def id_t(serv):
     if serv == "0":
@@ -131,10 +145,10 @@ def id_t(serv):
         spdcntrl(1,200,20)
         #kit.servo[1].angle = 20
     elif serv == "2":
-        spdcntrl(2,200,5)
+        spdcntrl(2,200,0)
         #kit.servo[2].angle = 5
     elif serv == "3":
-        spdcntrl(3,200,25)
+        spdcntrl(3,200,15)
         #kit.servo[3].angle = 25
     elif serv == "4":
         spdcntrl(4,200,140)
@@ -292,9 +306,9 @@ def tasks(insval):
             GPIO.cleanup()
             exit()
 
-        elif key == "idle":
+        #elif key == "idle":
             
-            idle()
+         #   idle()
 
 
         elif key == "2":
@@ -601,8 +615,8 @@ def tasks(insval):
             #id_t("0")
             p0 = multiprocessing.Process(target=spdcntrl,args=[0,200,180])
             p1 = multiprocessing.Process(target=spdcntrl,args=[1,200,20])
-            p2 = multiprocessing.Process(target=spdcntrl,args=[2,200,5])
-            p3 = multiprocessing.Process(target=spdcntrl,args=[3,200,25])
+            p2 = multiprocessing.Process(target=spdcntrl,args=[2,200,0])
+            p3 = multiprocessing.Process(target=spdcntrl,args=[3,200,15])
             p4 = multiprocessing.Process(target=spdcntrl,args=[4,200,140])
             p5 = multiprocessing.Process(target=spdcntrl,args=[5,200,95])
             if __name__ == '__main__':
@@ -635,9 +649,9 @@ def tasks(insval):
             an_b = math.radians(kit.servo[2].angle)
             an_c = math.radians(kit.servo[3].angle)
             print(Fore.BLUE + "destination x-dist (cm)" + Fore.RESET)
-            d_x = input()
+            d_x = int(input())
             print(Fore.BLUE + "destination y-dist (cm)" + Fore.RESET)
-            d_y = input()
+            d_y = int(input())
             destination = [d_x,d_y]
             currpos = [r1*math.sin(an_a)+r2*math.sin(an_a+an_b)+r3*math.sin(an_a+an_b+an_c),r1*math.cos(an_a)+r2*math.cos(an_a+an_b)+r3*math.cos(an_a+an_b+an_c)]
             #steps = 200
