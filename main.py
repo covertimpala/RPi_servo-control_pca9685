@@ -243,15 +243,15 @@ def distance():
 
     while GPIO.input(GPIO_ECHO) == 0:
         StartTime = time.time()
-    #while GPIO.input(GPIO_ECHO) == 1:
-    while True:
-        if GPIO.input(GPIO_ECHO) == 1:
-            StopTime = time.time()
-            break
-        else:
-            if time.time() - StartTime > 1:
-                StopTime = StartTime + 1
-                break
+    while GPIO.input(GPIO_ECHO) == 1:
+    #while True:
+        #if GPIO.input(GPIO_ECHO) == 1:
+        StopTime = time.time()
+            #break
+        #else:
+            #if time.time() - StartTime > 1:
+                #StopTime = StartTime + 1
+                #break
             
 
     TimeElapsed = StopTime - StartTime
