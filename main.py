@@ -233,7 +233,7 @@ def choosepos(segment1, segment2, segment3, x_dist, y_dist, step, _range, bypass
 ################################################# Inverse Kinematics END #################################################
 #========================================================================================================================#
     
-def distance():
+def dista(q):
     GPIO.output(GPIO_TRIGGER, True)
 
     time.sleep(0.00001)
@@ -258,6 +258,23 @@ def distance():
     distance = (TimeElapsed * 34300) / 2
 
     return distance
+
+def distance():
+    q = multiprocessing.Queue()
+    ds = multiprocessing.Process(target=dista, args=(q))
+    if __name__ == '__main__':
+        ds.start()
+    strtm = time.time()
+    global miii
+    while time.time() - strtm() < 1:
+        miii=q.get()
+        if miii != None:
+            break
+    if miii != None:
+        return miii
+    else:
+        return distance()
+        
 
 def tasks(insval):
     global run
