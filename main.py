@@ -171,11 +171,11 @@ def spdcntrl(selserv, stp, an): #servo, step, angle
 #========================================================================================================================#
 
 def calculateab(locx, locy, o, r1, r2, r3, _range, bypass, x_dist, y_dist):
-    b = math.acos((locx**2 + locy**2 - r1**2 - r2**2) / (r1**2+r2**2))#(r1**2+r2**2)            (2*r1*r2)
+    b = math.pi - math.acos((-locx**2 - locy**2 + r1**2 + r2**2) / (2*r1*r2))#(r1**2+r2**2)            (2*r1*r2)
     #print("b:", b)
     bt = math.degrees(b)
     if bt >= _range[2]*bypass and bt <=_range[3]*bypass:
-        a = math.atan(locx/locy)-math.atan((r2*math.sin(b))/(r1+(r2*math.cos(b))))
+        a = -math.asin((r2*math.sin(b))/((locx**2 + locy**2)**(1/2)))+math.asin((locx)/((locx**2 + locy**2)**(1/2)))
         #print("a:", a)
         at = math.degrees(a)
         if at >= _range[0]*bypass and at <=_range[1]*bypass:
@@ -233,7 +233,7 @@ def choosepos(segment1, segment2, segment3, x_dist, y_dist, step, _range, bypass
 ################################################# Inverse Kinematics END #################################################
 #========================================================================================================================#
     
-def dista(q):
+def dista(q,n):
     GPIO.output(GPIO_TRIGGER, True)
 
     time.sleep(0.00001)
@@ -256,12 +256,14 @@ def dista(q):
 
     TimeElapsed = StopTime - StartTime
     distance = (TimeElapsed * 34300) / 2
-
-    return distance
+    q.value=distance
+    #return distance
 
 def distance():
-    q = multiprocessing.Queue()
-    ds = multiprocessing.Process(target=dista, args=(q))
+    tm = multiprocessing.Value('d', 0)
+    #q = multiprocessing.Queue()
+    #ds = multiprocessing.Process(target=dista, args=(q))
+    ds = multiprocessing.Process(target=dista, args=(tm,1))
     if __name__ == '__main__':
         ds.start()
     strtm = time.time()
