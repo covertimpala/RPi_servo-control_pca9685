@@ -62,7 +62,7 @@ kit.servo[1].actuation_range = 120
 kit.servo[2].actuation_range = 130 #adjust
 kit.servo[3].actuation_range = 90  #still needs adjustment
 kit.servo[4].actuation_range = 180  #still needs adjustment
-kit.servo[5].actuation_range = 132   #range 90 = open 132 = closed
+kit.servo[5].actuation_range = 90   #range 50 = open 90 = closed
 global run
 global lock
 r1 = 15
@@ -395,7 +395,7 @@ def tasks(insval):
             print(f"servo [2] = 00° - {kit.servo[2].actuation_range}°") #update
             print(f"servo [3] = 00° - {kit.servo[3].actuation_range}°")
             print(f"servo [4] = 00° - {kit.servo[4].actuation_range}°")
-            print(f"servo [5] = 90° - {kit.servo[5].actuation_range}°")
+            print(f"servo [5] = 50° - {kit.servo[5].actuation_range}°")
 
 
         elif key == "help":
