@@ -261,7 +261,7 @@ def dista(q,n):
 
 def distance():
     tm = multiprocessing.Value('d', 0)
-    #q = multiprocessing.Queue()
+    q = multiprocessing.Queue() ###########################################################################
     #ds = multiprocessing.Process(target=dista, args=(q))
     ds = multiprocessing.Process(target=dista, args=(tm,1))
     if __name__ == '__main__':
