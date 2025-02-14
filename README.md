@@ -16,7 +16,11 @@ Once you have done that it will reply with `choose angle`. Type the appropriate 
 
 ### EMG
 EMG (Electromyography) is used to measure the muscles response to electrical signals.
-In this project the EMG signals are used to control a robotic arm.
+In this project the EMG signals can be used to control a robotic arm.
+
+### Inverse Kinematics
+This project uses inverse kinematic equations derived in my Inverse kinematics repo.
+
 
 ### Setup:
 
