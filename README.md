@@ -19,7 +19,7 @@ EMG (Electromyography) is used to measure the muscles response to electrical sig
 In this project the EMG signals can be used to control a robotic arm.
 
 ### Inverse Kinematics
-This project uses inverse kinematic equations derived in my [Inverse kinematics repo]().
+This project uses inverse kinematic equations derived in my [Inverse kinematics repo](https://github.com/covertimpala/3-joint-inverse-kinematics).
 
 
 ### Setup:
