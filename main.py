@@ -9,7 +9,11 @@ import math
 from adafruit_servokit import ServoKit
 #from multiprocessing import Pool
 import multiprocessing
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO #depreciated
+from gpiozero import LED, OutputDevice, DistanceSensor
+
+import os
+os.environ["GPIOZERO_PIN_FACTORY"] = "lgpio"
 
 try:
     from colorama import Fore
@@ -42,17 +46,23 @@ import speech_recognition as sr
 global audio_sentence
 
 
-GPIO.setmode(GPIO.BCM)
+#GPIO.setmode(GPIO.BCM)
 
 GPIO_TRIGGER = 23
 GPIO_ECHO = 24
-LED = 18
+LED_P = 18
 RELAY = 17
 
-GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
-GPIO.setup(GPIO_ECHO, GPIO.IN)
-GPIO . setup ( LED , GPIO . OUT )
-GPIO.setup(RELAY, GPIO.OUT)
+#GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
+#GPIO.setup(GPIO_ECHO, GPIO.IN)
+#GPIO . setup ( LED , GPIO . OUT )
+#GPIO.setup(RELAY, GPIO.OUT)
+
+#trigger = OutputDevice(GPIO_TRIGGER)
+echo = DistanceSensor(echo=GPIO_ECHO, trigger=GPIO_TRIGGER)
+led = LED(LED_P)
+relay = OutputDevice(RELAY)
+
 # Set channels to the number of servo channels on your kit.
 # 8 for FeatherWing, 16 for Shield/HAT/Bonnet.
 kit = ServoKit(channels=16)
@@ -78,6 +88,14 @@ EMG = 0
 global relav0
 global relav1
 global error0
+
+def cleanup():
+    #trigger.close()
+    echo.close()
+    led.close()
+    relay.close()
+    print("GPIO cleanup done")
+
 def speech_to_text():
     global run
     global key
@@ -234,29 +252,31 @@ def choosepos(segment1, segment2, segment3, x_dist, y_dist, step, _range, bypass
 #========================================================================================================================#
     
 def dista(q,n):
-    GPIO.output(GPIO_TRIGGER, True)
+    #GPIO.output(GPIO_TRIGGER, True)
 
-    time.sleep(0.00001)
-    GPIO.output(GPIO_TRIGGER, False)
-    StartTime = time.time()
-    StopTime = time.time()
+    #time.sleep(0.00001)
+    #GPIO.output(GPIO_TRIGGER, False)
+    #StartTime = time.time()
+    #StopTime = time.time()
 
-    while GPIO.input(GPIO_ECHO) == 0:
-        StartTime = time.time()
-    while GPIO.input(GPIO_ECHO) == 1:
+    #while GPIO.input(GPIO_ECHO) == 0:
+    #    StartTime = time.time()
+    #while GPIO.input(GPIO_ECHO) == 1:
     #while True:
         #if GPIO.input(GPIO_ECHO) == 1:
-        StopTime = time.time()
+    #    StopTime = time.time()
             #break
         #else:
             #if time.time() - StartTime > 1:
                 #StopTime = StartTime + 1
                 #break
+    distance = echo.distance * 100  # Convert to cm
+    q.value = distance
             
 
-    TimeElapsed = StopTime - StartTime
-    distance = (TimeElapsed * 34300) / 2
-    q.value=distance
+    #TimeElapsed = StopTime - StartTime
+    #distance = (TimeElapsed * 34300) / 2
+    #q.value=distance
     #return distance
 
 def distance():
@@ -329,8 +349,10 @@ def tasks(insval):
 
         elif key == "exit":
             print("exiting")
-            GPIO.output(GPIO_TRIGGER, False)
-            GPIO.cleanup()
+            #GPIO.output(GPIO_TRIGGER, False)
+            #GPIO.cleanup()
+            #trigger.off()
+            cleanup()
             exit()
 
         #elif key == "idle":
@@ -436,12 +458,14 @@ def tasks(insval):
 
 
         elif key == "led on":
-            GPIO.output(18, True)
+            #GPIO.output(18, True)
+            led.on()
             print("led is on")
 
 
         elif key == "led off":
-            GPIO.output(18, False)
+            #GPIO.output(18, False)
+            led.off()
             print("led is off")
 
 
@@ -603,12 +627,14 @@ def tasks(insval):
 
 
         elif key == "power on":
-            GPIO.output(RELAY, GPIO.HIGH)
+            #GPIO.output(RELAY, GPIO.HIGH)
+            relay.on()
             print("relay on")
 
 
         elif key == "power off":
-            GPIO.output(RELAY, GPIO.LOW)
+            #GPIO.output(RELAY, GPIO.LOW)
+            relay.off()
             print("relay off")
                         
 
@@ -751,5 +777,12 @@ def tasks(insval):
         if run == 1:
             run = 20
 
-
-tasks("")
+try:
+    tasks("")
+except Exception as e:
+    print(e)
+    cleanup()
+    exit()
+finally:
+    cleanup()
+    exit()
