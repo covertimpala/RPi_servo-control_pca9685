@@ -251,7 +251,7 @@ def choosepos(segment1, segment2, segment3, x_dist, y_dist, step, _range, bypass
 ################################################# Inverse Kinematics END #################################################
 #========================================================================================================================#
     
-def dista(q,n):
+def distance():
     #GPIO.output(GPIO_TRIGGER, True)
 
     #time.sleep(0.00001)
@@ -271,7 +271,8 @@ def dista(q,n):
                 #StopTime = StartTime + 1
                 #break
     distance = echo.distance * 100  # Convert to cm
-    q.value = distance
+    #q.value = distance
+    return distance
             
 
     #TimeElapsed = StopTime - StartTime
@@ -279,23 +280,23 @@ def dista(q,n):
     #q.value=distance
     #return distance
 
-def distance():
-    tm = multiprocessing.Value('d', 0)
-    q = multiprocessing.Queue() ###########################################################################
-    #ds = multiprocessing.Process(target=dista, args=(q))
-    ds = multiprocessing.Process(target=dista, args=(tm,1))
-    if __name__ == '__main__':
-        ds.start()
-    strtm = time.time()
-    global miii
-    while time.time() - strtm() < 1:
-        miii=q.get()
-        if miii != None:
-            break
-    if miii != None:
-        return miii
-    else:
-        return distance()
+#def distance():
+#    tm = multiprocessing.Value('d', 0)
+#    q = multiprocessing.Queue() ###########################################################################
+#    #ds = multiprocessing.Process(target=dista, args=(q))
+#    ds = multiprocessing.Process(target=dista, args=(tm,1))
+#    if __name__ == '__main__':
+#        ds.start()
+#    strtm = time.time()
+#    global miii
+#    while time.time() - strtm() < 1:
+#        miii=q.get()
+#        if miii != None:
+#            break
+#    if miii != None:
+#        return miii
+#    else:
+#        return distance()
         
 
 def tasks(insval):
