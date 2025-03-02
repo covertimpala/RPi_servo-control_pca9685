@@ -41,6 +41,7 @@ r3 = 14.5 #Length of segment 3 of the arm (between joints c (3) and end effector
 scale_factor = 10 #scale the simulated arm
 offsets = [50, 90, 30]
 modifiers = [1,-1,-1]
+modifiers_scaling = [1,1,1]
 #global bthld
 bthld = 0
 #global togglemode
@@ -54,6 +55,12 @@ _range = [-90, 90] #angle ranges (anything outside the range is filtered out (as
 #Degorrad = "deg" # choose between "deg" or "rad" (degrees or radians for output)
 #global joy_inv_k
 #joy_inv_k = [0,0,0]
+def linearscale(ang, scale):
+    scaled_ang = []
+    for l, i in enumerate(ang):
+        scaled_ang.append(scale[l]*i)
+    return scaled_ang
+
 def cleanup():
     #trigger.close()
     relay.close()
@@ -65,9 +72,10 @@ def toggle_relay():
 
 def move_servos(a0, a1, a2, a3, a4, a5):
     try:
-        an1 = a1*modifiers[0]+offsets[0]
-        an2 = a2*modifiers[1]+offsets[1]
-        an3 = a3*modifiers[2]+offsets[2]
+        an1 = a1*modifiers[0]*modifiers_scaling[0]+offsets[0]
+        an2 = a2*modifiers[1]*modifiers_scaling[1]+offsets[1]
+        an3 = a3*modifiers[2]*modifiers_scaling[2]+offsets[2]
+        #an1, an2, an3 = linearscale([an1, an2, an3], modifiers_scaling)
         print(an1, an2, an3)
         if an3 > 20:
             an3 = 20
@@ -213,6 +221,7 @@ def main():
     global btoggle2
     # Set the width and height of the screen (width, height), and name the window.
     togglemode = 0
+    servoselect_mode = 0
     global bthld
     #bthld = 0
     screen = pygame.display.set_mode((1000, 700))
@@ -273,6 +282,24 @@ def main():
                     #target_p[5] += 0.5
                     bthld = 0.5
                     mvmnt = 1
+                elif event.button == 11:
+                    if servoselect_mode == 0:
+                        servoselect_mode = 2
+                    else:
+                        servoselect_mode -= 1
+                    print(servoselect_mode)
+                elif event.button == 12:
+                    if servoselect_mode == 2:
+                        servoselect_mode = 0
+                    else:
+                        servoselect_mode += 1
+                    print(servoselect_mode)
+                elif event.button == 13:
+                    modifiers_scaling[servoselect_mode] += 0.1
+                    print(modifiers_scaling)
+                elif event.button == 14:
+                    modifiers_scaling[servoselect_mode] -= 0.1
+                    print(modifiers_scaling)
                 #else:
                     #bthld = 0
             
@@ -475,7 +502,10 @@ def main():
             text_print.unindent()
         
         if mvmnt == 1:
-            move_servos(target_p[2], math.degrees(joy_inv_k[0]), math.degrees(joy_inv_k[1]), math.degrees(joy_inv_k[2]), target_p[5], target_p[4])
+            try:
+                move_servos(target_p[2], math.degrees(joy_inv_k[0]), math.degrees(joy_inv_k[1]), math.degrees(joy_inv_k[2]), target_p[5], target_p[4])
+            except TypeError:
+                print("Solution error")
             
 
         # Go ahead and update the screen with what we've drawn.
