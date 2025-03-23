@@ -18,7 +18,7 @@ kit.servo.frequency = 50
 kit.servo[0].actuation_range = 180
 kit.servo[1].actuation_range = 120
 kit.servo[2].actuation_range = 130 #adjust
-kit.servo[3].actuation_range = 90  #still needs adjustment
+kit.servo[3].actuation_range = 180  #90 still needs adjustment
 kit.servo[4].actuation_range = 180  #still needs adjustment
 kit.servo[5].actuation_range = 70   #range 40 = open 70 = closed
 
@@ -26,7 +26,7 @@ pygame.init()
 
 dec_p = 2
 
-target_p = [10,10, 0, 130, 50, 40] # x, y, rotation of joint 1, solution (position of joint 4 around target), claw, joint 5 rotation
+target_p = [15,5, 0, 130, 50, 40] # x, y, rotation of joint 1, solution (position of joint 4 around target), claw, joint 5 rotation
 
 
 try:
@@ -37,11 +37,11 @@ except Exception:
 
 r1 = 15 #Length of segment 1 of the arm (between joints a and b (1 and 2))
 r2 = 7.9 #Length of segment 2 of the arm (between joints b and c (2 and 3))
-r3 = 14.5 #Length of segment 3 of the arm (between joints c (3) and end effector)
+r3 = 20#14.5 #Length of segment 3 of the arm (between joints c (3) and end effector)
 scale_factor = 10 #scale the simulated arm
-offsets = [50, 90, 30]
+offsets = [11.242, -14.064, 31.156] #50 = vertical s1, 90 = vertical s2, 30 = vertical s3
 modifiers = [1,-1,-1]
-modifiers_scaling = [1,1,1]
+modifiers_scaling = [1.4742,1.2178,1.835]
 #global bthld
 bthld = 0
 #global togglemode
@@ -72,13 +72,13 @@ def toggle_relay():
 
 def move_servos(a0, a1, a2, a3, a4, a5):
     try:
-        an1 = a1*modifiers[0]*modifiers_scaling[0]+offsets[0]
-        an2 = a2*modifiers[1]*modifiers_scaling[1]+offsets[1]
-        an3 = a3*modifiers[2]*modifiers_scaling[2]+offsets[2]
+        an1 = (a1*modifiers[0]+90)*modifiers_scaling[0]+offsets[0]
+        an2 = (a2*modifiers[1]+90)*modifiers_scaling[1]+offsets[1]
+        an3 = (a3*modifiers[2]+90)*modifiers_scaling[2]+offsets[2]
         #an1, an2, an3 = linearscale([an1, an2, an3], modifiers_scaling)
-        print(an1, an2, an3)
-        if an3 > 20:
-            an3 = 20
+        print(an1, an2, an3, "|||", a1, a2, a3)
+        #if an3 > 20:
+         #   an3 = 20
         #splist = []
         #splist.append(multiprocessing.Process(target=servmov,args=[0,a0]))
         #splist.append(multiprocessing.Process(target=servmov,args=[1,an1]))
@@ -101,6 +101,7 @@ def move_servos(a0, a1, a2, a3, a4, a5):
            #     splist[i].start()
             #except Exception as e:
              #   print(e)
+        
         sp0.start()
         sp1.start()
         sp2.start()
@@ -112,8 +113,10 @@ def move_servos(a0, a1, a2, a3, a4, a5):
 
 def servmov(servo, angle):
     try:
-        kit.servo[servo].angle = angle
+        if angle > 0 and angle < 180:
+            kit.servo[servo].angle = angle
     except Exception as e:
+        print("ERR: exception in servmov")
         print(e)
 
 def verify(a,b,c):
@@ -366,7 +369,7 @@ def main():
                 #print(axis)
                 
                 if i == 0: #J1 x-axis
-                    if axis > 0.2 or axis < -0.1:
+                    if axis > 0.2 or axis < -0.2:
                         #target_p[0] += -1*round(axis/5,dec_p)
                         #sft[3] = round(axis/5,dec_p)
                         if 0 < target_p[2] + round((axis),dec_p) <= 180:
@@ -376,7 +379,7 @@ def main():
                         #mvmnt = 1
                         sft[0] = 0
                 if i == 1: #J1 y-axis
-                    if axis > 0.02 or axis < -0.19:
+                    if axis > 0.2 or axis < -0.2:
                         target_p[1] += round(-1*axis/5,dec_p)
                         sft[1] = -1*round(-1*axis/5,dec_p)
                         mvmnt = 1
@@ -384,7 +387,7 @@ def main():
                         #mvmnt = 1
                         sft[1] = 0
                 if i == 2 and togglemode != 1: #J2 x-axis ------->> Claw
-                    if axis > 0.12:
+                    if axis > 0.2:
                         if target_p[4] + round(axis/2,dec_p) >=30 and target_p[4] + round(axis/2,dec_p) <= 70:
                             target_p[4] += round(axis/2,dec_p)
                             mvmnt = 1
@@ -397,7 +400,7 @@ def main():
                             #joystick.rumble(0.7, 1, 10)
                         #print("x-motion")
                 if i == 3 and togglemode != 2: #J2 y-axis ------->> position of joint 4 around target point
-                    if axis > 0 or axis < -0.19:
+                    if axis > 0.2 or axis < -0.2:
                         target_p[3] += round(-1*axis/2,dec_p)
                         sft[2] = round(axis/2,dec_p)
                         mvmnt = 1
@@ -410,7 +413,7 @@ def main():
                 if i == 4: #trigger 1 (LT)
                     #if target_p[2] - round((axis + 1)/2,dec_p) >= 0:
                      #   target_p[2] -= round((axis + 1)/2,dec_p)
-                    if axis > 0.2 or axis < -0.1:
+                    if axis > 0.2 or axis < -0.2:
                         target_p[0] += -1*round(axis/5,dec_p)
                         sft[0] = round(axis/5,dec_p)
                         mvmnt = 1
@@ -418,7 +421,7 @@ def main():
                         #mvmnt = 1
                         sft[0] = 0
                 if i == 5 and togglemode != 1: #trigger 2 (RT)
-                    if axis > 0.12:
+                    if axis > 0.2:
                         #if target_p[2] + round((axis + 1)/2,dec_p) <= 180:
                         #    target_p[2] += round((axis + 1)/2,dec_p)
                         axis = axis*(-1)
