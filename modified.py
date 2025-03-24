@@ -35,6 +35,7 @@ try:
 except Exception:
     nocolor = 1
 
+TOLERANCE = 0.1
 r1 = 15 #Length of segment 1 of the arm (between joints a and b (1 and 2))
 r2 = 7.9 #Length of segment 2 of the arm (between joints b and c (2 and 3))
 r3 = 20#14.5 #Length of segment 3 of the arm (between joints c (3) and end effector)
@@ -148,7 +149,7 @@ def calculateab(locx, locy, o, _range, bypass, x_dist, y_dist):
             #print(f"[{verify(at,bt,-c)}] == [{x_dist, y_dist}]")
 
             # Verification of the output values
-            if verify(a,b,ct)[0] == round(x_dist,2) and verify(a,b,ct)[1] == round(y_dist,2):
+            if abs(verify(a,b,ct)[0] - round(x_dist,2)) <= TOLERANCE and abs(verify(a,b,ct)[1] - round(y_dist,2)) <= tolerance:
                 return([a,b,ct])
             elif verify(a,b,-ct)[0] == round(x_dist,2) and verify(a,b,-ct)[1] == round(y_dist,2):
                 return([a,b,-ct])
