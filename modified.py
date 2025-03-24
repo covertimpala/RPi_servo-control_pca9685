@@ -149,7 +149,7 @@ def calculateab(locx, locy, o, _range, bypass, x_dist, y_dist):
             #print(f"[{verify(at,bt,-c)}] == [{x_dist, y_dist}]")
 
             # Verification of the output values
-            if abs(verify(a,b,ct)[0] - round(x_dist,2)) <= TOLERANCE and abs(verify(a,b,ct)[1] - round(y_dist,2)) <= tolerance:
+            if abs(verify(a,b,ct)[0] - round(x_dist,2)) <= TOLERANCE and abs(verify(a,b,ct)[1] - round(y_dist,2)) <= TOLERANCE:
                 return([a,b,ct])
             elif verify(a,b,-ct)[0] == round(x_dist,2) and verify(a,b,-ct)[1] == round(y_dist,2):
                 return([a,b,-ct])
