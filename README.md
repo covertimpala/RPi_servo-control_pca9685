@@ -1,7 +1,7 @@
-# RPi_servo-control_pca9685
+# Robot Arm RPi_servo-control_pca9685
 raspberry pi 180° servo control using pca9685
 
-### Please use the newest version
+### Please use the newest version (EMG not currently implemented in latest version)
 
 ### Requirements
 Requires you to have the [adafruit servokit library](https://circuitpython.readthedocs.io/projects/servokit/en/latest/) installed
