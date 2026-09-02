@@ -1,4 +1,4 @@
-# Robot Arm RPi_servo-control_pca9685
+# Robot Arm with RPi_servo-control_pca9685, ultrasonic distance sensor and a self derived inverse kinematic equations
 raspberry pi 180° servo control using pca9685
 
 ### Please use the newest version (EMG not currently implemented in latest version)
